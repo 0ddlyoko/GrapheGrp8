@@ -4,6 +4,7 @@ import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
+import java.util.regex.Pattern;
 
 /**
  * 
@@ -24,11 +25,12 @@ public class ReadFile {
 
 	public ReadFile(File file) {
 		try {
+			Pattern space = Pattern.compile(" ");
 			BufferedReader in = new BufferedReader(new FileReader(file));
-			nbEdges = Integer.parseInt(in.readLine().split(" ")[0]);
-			nbVertices = Integer.parseInt(in.readLine().split(" ")[0]);
-			headTab = StringTabToIntTab(in.readLine().split(" "));
-			succTab = StringTabToIntTab(in.readLine().split(" "));
+			nbEdges = Integer.parseInt(space.split(in.readLine())[0]);
+			nbVertices = Integer.parseInt(space.split(in.readLine())[0]);
+			headTab = StringTabToIntTab(space.split(in.readLine()));
+			succTab = StringTabToIntTab(space.split(in.readLine()));
 			degTab = buildTabDegree();
 			in.close();
 
