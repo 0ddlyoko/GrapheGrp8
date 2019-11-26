@@ -11,7 +11,7 @@ public class Modularity {
 	 * constructor
 	 * @param rd class to read a file and initialize the head table, the successor table and the degree table
 	 */
-	Modularity(ReadFile rd){
+	public Modularity(ReadFile rd){
 		initMatrixAdj(rd.getNbVertices(),rd.getHeadTab(),rd.getSuccTab());
 		initMatrixProb(rd.getNbVertices(), rd.getDegTab(),rd.getNbEdges());
 	}
@@ -27,7 +27,6 @@ public class Modularity {
 		for(int i = 0; i < size_; i++) {
 			for(int j = head[i] - 1; j < head[i+1]-1; j++) {
 				matrixAdj[i][succ[j] - 1] = 1; // -1 car les sommets dans successeur vont de 1 à n hors besoin d'indice 0 à n-1
-
 			}
 		}
 	}
@@ -41,8 +40,7 @@ public class Modularity {
 		matrixProb = new double[size_][size_];
 		for(int i = 0; i < size_; i++) {
 			for(int j = i + 1; j < size_; j++) {
-				matrixProb[i][j] = deg[i] * deg[j] / (2.0 * m);
-				matrixProb[j][i] = matrixProb[i][j];
+				matrixProb[j][i] = matrixProb[i][j] = deg[i] * deg[j] / (2.0 * m);
 			}
 		}
 	}
