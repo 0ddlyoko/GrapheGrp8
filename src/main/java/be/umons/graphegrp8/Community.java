@@ -1,5 +1,6 @@
 package be.umons.graphegrp8;
 
+import java.util.Collection;
 import java.util.HashMap;
 
 public class Community {
@@ -30,10 +31,31 @@ public class Community {
 	 */
 	public void removeNode(Node node) {
 		nodes.remove(node.getId());
+		node.setCommunity(null);
+	}
+
+	/**
+	 * @return The number of nodes this community has
+	 */
+	public int size() {
+		return nodes.size();
+	}
+
+	public Collection<Node> getNodes() {
+		return nodes.values();
 	}
 
 	public int getId() {
 		return id;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Community))
+			return false;
+		return ((Community) obj).hashCode() == hashCode();
 	}
 
 	@Override

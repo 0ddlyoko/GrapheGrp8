@@ -1,6 +1,7 @@
 package be.umons.graphegrp8;
 
 import java.io.File;
+import java.util.Collection;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -19,13 +20,13 @@ public class NodeManager {
 		this.readFile = new ReadFile(file);
 		this.nodes = new HashMap<Integer, Node>();
 		this.communities = new HashMap<Integer, Community>();
-		load();
+//		load();
 	}
 
 	/**
 	 * Load all
 	 */
-	private void load() {
+	public void load() {
 		LOG.info("Loading NodeManager");
 		// Create the Modularity
 		modularity = new Modularity(readFile);
@@ -73,8 +74,33 @@ public class NodeManager {
 		}
 	}
 
+	/**
+	 * Change the community of the specific node<br />
+	 * If old community is empty, remove the old community from the HashMap
+	 * 
+	 * @param node      The node
+	 * @param community The new community
+	 */
 	public void changeCommunity(Node node, Community community) {
+		changeCommunity(node, community, true);
+	}
+
+	/**
+	 * Change the community of the specific node<br />
+	 * If deleteOldCommunity is set to true and old community is empty, remove the
+	 * old community from the HashMap
+	 * 
+	 * @param node               The node
+	 * @param community          The new community
+	 * @param deleteOldCommunity If set to true and the old community is empty,
+	 *                           remove the old community from the HashMap
+	 */
+	public void changeCommunity(Node node, Community community, boolean deleteOldCommunity) {
+		Community oldCommunity = node.getCommunity();
 		community.addNode(node);
+		// Test if old community is empty and if it is, remove it from the HashMap
+		if (deleteOldCommunity && oldCommunity != null && oldCommunity.size() == 0)
+			communities.remove(oldCommunity.getId());
 	}
 
 	public File getFile() {
@@ -89,11 +115,19 @@ public class NodeManager {
 		return modularity;
 	}
 
-	public Node getNode(long id) {
+	public Collection<Node> getNodes() {
+		return nodes.values();
+	}
+
+	public Node getNode(int id) {
 		return nodes.get(id);
 	}
 
-	public Community getCommunity(long id) {
+	public Collection<Community> getCommunities() {
+		return communities.values();
+	}
+
+	public Community getCommunity(int id) {
 		return communities.get(id);
 	}
 }

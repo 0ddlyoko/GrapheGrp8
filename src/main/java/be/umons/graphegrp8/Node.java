@@ -34,8 +34,23 @@ public class Node {
 		return community;
 	}
 
+	/**
+	 * Set the community of this node.<br />
+	 * !!!! DO NOT USE THIS METHOD, USE {@link Community#addNode(Node)}
+	 * 
+	 * @param community
+	 */
 	public void setCommunity(Community community) {
 		this.community = community;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj == null)
+			return false;
+		if (!(obj instanceof Node))
+			return false;
+		return ((Node) obj).hashCode() == hashCode();
 	}
 
 	@Override

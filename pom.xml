@@ -16,7 +16,7 @@
 		<maven.compiler.source>1.8</maven.compiler.source>
 		<maven.compiler.target>1.8</maven.compiler.target>
 	</properties>
-	
+
 	<developers>
 		<developer>
 			<name>Giacomello Nathan</name>
@@ -33,13 +33,6 @@
 			</roles>
 		</developer>
 		<developer>
-			<name>Glibert Thomas</name>
-			<email>???@gmail.com</email>
-			<roles>
-				<role>Developer</role>
-			</roles>
-		</developer>
-		<developer>
 			<name>Coyez François</name>
 			<email>???@gmail.com</email>
 			<roles>
@@ -47,7 +40,7 @@
 			</roles>
 		</developer>
 	</developers>
-	
+
 	<build>
 		<defaultGoal>clean install</defaultGoal>
 		<finalName>GrapheGrp8-${project.version}</finalName>
@@ -100,5 +93,13 @@
 			<artifactId>slf4j-log4j12</artifactId>
 			<version>1.7.6</version>
 		</dependency>
+		<!-- https://mvnrepository.com/artifact/junit/junit -->
+		<dependency>
+			<groupId>junit</groupId>
+			<artifactId>junit</artifactId>
+			<version>4.12</version>
+			<scope>test</scope>
+		</dependency>
+
 	</dependencies>
 </project>
