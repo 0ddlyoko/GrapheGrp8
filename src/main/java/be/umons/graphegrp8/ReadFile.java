@@ -1,4 +1,4 @@
-package graphe;
+package be.umons.graphegrp8;
 
 import java.io.BufferedReader;
 import java.io.FileReader;
