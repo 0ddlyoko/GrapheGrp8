@@ -103,6 +103,61 @@ public class NodeManager {
 			communities.remove(oldCommunity.getId());
 	}
 
+	// Algorithme Evolutionnaire
+
+	/**
+	 * Initialisation aléatoire d'une population
+	 */
+	public void initialization() {
+		load();
+		// On appele la suite
+		evaluation();
+	}
+
+	/**
+	 * Evaluation des performances des individus
+	 */
+	public void evaluation() {
+	}
+
+	/**
+	 * Sélection pour la reproduction
+	 */
+	public void selection() {
+	}
+
+	/**
+	 * Croisements
+	 */
+	public void breading() {
+	}
+
+	/**
+	 * Mutations
+	 */
+	public void mutation() {
+	}
+
+	/**
+	 * Evaluation des performances des enfants
+	 */
+	public void evaluationChild() {
+	}
+
+	/**
+	 * Sélection pour le remplacement
+	 */
+	public void selectionReplacement() {
+	}
+
+	/**
+	 * Stop ?
+	 */
+	public void doWeStopNow() {
+	}
+
+	// Getters
+
 	public File getFile() {
 		return file;
 	}
