@@ -16,6 +16,10 @@ public class NodeManager {
 	private Node[] nodes;
 	private Node[] fakeIdNodes;
 	private HashMap<Integer, Community> communities;
+	// If true, a node has changed community
+	private boolean edited;
+	// The current node
+	private Node selectedNode;
 
 	public NodeManager(File file) {
 		this.file = file;
@@ -109,6 +113,19 @@ public class NodeManager {
 	// Algorithme Evolutionnaire
 
 	/**
+	 * Start the algorithm
+	 */
+	public void start() {
+		initialization();
+		// Done, call evaluation
+		evaluation();
+		do {
+			// Selection
+			selection();
+		} while (!doWeStopNow());
+	}
+
+	/**
 	 * Initialisation aléatoire d'une population<br />
 	 * Chaque noeud aura un id aléatoire unique
 	 */
@@ -121,16 +138,14 @@ public class NodeManager {
 			// random node
 			int rand = r.nextInt(length);
 			// Invert fake id
-			fakeIdNodes[i].setFakeId(rand);
-			fakeIdNodes[rand].setFakeId(i);
+			fakeIdNodes[i].setFakeId(rand + 1);
+			fakeIdNodes[rand].setFakeId(i + 1);
 			// Invert position
 			Node a = fakeIdNodes[i];
 			fakeIdNodes[i] = fakeIdNodes[rand];
 			fakeIdNodes[rand] = a;
 		}
 		LOG.info("Content mixed !");
-		// Done, call evaluation
-		evaluation();
 	}
 
 	/**
@@ -145,6 +160,22 @@ public class NodeManager {
 	 * Ici nous allons sélectionner un noeud
 	 */
 	public void selection() {
+		if (fakeIdNodes.length == 0) {
+			// Whut ?
+			return;
+		}
+		if (selectedNode == null)
+			selectedNode = fakeIdNodes[0];
+		else {
+			// Test if it's the last one
+			if (selectedNode.getFakeId() == fakeIdNodes.length)
+				// Last one so here we go back to first one
+				selectedNode = fakeIdNodes[0];
+			else
+				// Not last one so we take the next one
+				selectedNode = fakeIdNodes[selectedNode.getFakeId()];
+		}
+		LOG.info("Selecting {}", selectedNode);
 	}
 
 	/**
@@ -187,7 +218,8 @@ public class NodeManager {
 	 * reboucle 10 fois</li>
 	 * </ul>
 	 */
-	public void doWeStopNow() {
+	public boolean doWeStopNow() {
+		return selectedNode.getFakeId() == fakeIdNodes.length && !edited;
 	}
 
 	// Getters
