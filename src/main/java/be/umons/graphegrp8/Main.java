@@ -12,6 +12,11 @@ public class Main {
 	public Main() {
 		NodeManager nm = new NodeManager(new File("src/main/resources/graphs/files/File1.txt"));
 		nm.load();
+		nm.initialization();
+		for (int i = 0; i < nm.getNumberOfNodes(); i++) {
+			Node n = nm.getFakeNode(i + 1);
+			LOG.info("- " + n);
+		}
 //		ReadFile rf = new ReadFile("src/main/resources/graphs/files/File1.txt");
 //		Modularity mod = new Modularity(rf);
 

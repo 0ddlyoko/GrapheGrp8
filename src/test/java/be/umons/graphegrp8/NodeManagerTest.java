@@ -23,7 +23,7 @@ public class NodeManagerTest {
 
 	@Test
 	public void testNode() {
-		assertEquals(16, nodeManager.getNodes().size());
+		assertEquals(16, nodeManager.getNodes().length);
 		// First
 		Node n1 = nodeManager.getNode(1);
 		assertEquals(1, n1.getId());

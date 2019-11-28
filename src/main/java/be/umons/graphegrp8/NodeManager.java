@@ -3,6 +3,7 @@ package be.umons.graphegrp8;
 import java.io.File;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.Random;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,15 +13,14 @@ public class NodeManager {
 	private File file;
 	private ReadFile readFile;
 	private Modularity modularity;
-	private HashMap<Integer, Node> nodes;
+	private Node[] nodes;
+	private Node[] fakeIdNodes;
 	private HashMap<Integer, Community> communities;
 
 	public NodeManager(File file) {
 		this.file = file;
 		this.readFile = new ReadFile(file);
-		this.nodes = new HashMap<Integer, Node>();
 		this.communities = new HashMap<Integer, Community>();
-//		load();
 	}
 
 	/**
@@ -40,6 +40,8 @@ public class NodeManager {
 	 */
 	public void loadNodes() {
 		LOG.info("Loading {} nodes", readFile.getNbVertices());
+		this.nodes = new Node[readFile.getNbVertices()];
+		this.fakeIdNodes = new Node[readFile.getNbVertices()];
 		for (int i = 1; i <= readFile.getNbVertices(); i++) {
 			LOG.info("Loading node {}", i);
 			// Create community
@@ -47,7 +49,8 @@ public class NodeManager {
 			communities.put(c.getId(), c);
 			// Create node
 			Node n = new Node(i);
-			nodes.put(n.getId(), n);
+			nodes[i - 1] = n;
+			fakeIdNodes[i - 1] = n;
 			changeCommunity(n, c);
 		}
 	}
@@ -62,14 +65,14 @@ public class NodeManager {
 		// Add neighbors
 		// For each node
 		LOG.info("Loading {} edges for {} nodes", readFile.getNbEdges(), readFile.getNbVertices());
-		for (int i = 0; i < nodes.size(); i++) {
+		for (int i = 0; i < nodes.length; i++) {
 			LOG.info("  - Node {} with {} neighbors", i + 1, head[i + 1] - head[i]);
-			Node n = nodes.get(i + 1);
+			Node n = nodes[i];
 			// For each neighbors
 			for (int j = head[i]; j < head[i + 1]; j++) {
 				LOG.info("    - => {}", succ[j - 1]);
 				// A node
-				n.addNeighbors(nodes.get(succ[j - 1]));
+				n.addNeighbors(nodes[succ[j - 1] - 1]);
 			}
 		}
 	}
@@ -106,28 +109,47 @@ public class NodeManager {
 	// Algorithme Evolutionnaire
 
 	/**
-	 * Initialisation aléatoire d'une population
+	 * Initialisation aléatoire d'une population<br />
+	 * Chaque noeud aura un id aléatoire unique
 	 */
 	public void initialization() {
-		load();
-		// On appele la suite
+		LOG.info("Mixing the content ...");
+		Random r = new Random();
+		int length = fakeIdNodes.length;
+		for (int i = 0; i < length; i++) {
+			// We have to invert the position and the fakeId of the node at i position and a
+			// random node
+			int rand = r.nextInt(length);
+			// Invert fake id
+			fakeIdNodes[i].setFakeId(rand);
+			fakeIdNodes[rand].setFakeId(i);
+			// Invert position
+			Node a = fakeIdNodes[i];
+			fakeIdNodes[i] = fakeIdNodes[rand];
+			fakeIdNodes[rand] = a;
+		}
+		LOG.info("Content mixed !");
+		// Done, call evaluation
 		evaluation();
 	}
 
 	/**
-	 * Evaluation des performances des individus
+	 * Evaluation des performances des individus<br />
+	 * Ici nous allons calculer la modularité
 	 */
 	public void evaluation() {
 	}
 
 	/**
-	 * Sélection pour la reproduction
+	 * Sélection pour la reproduction<br />
+	 * Ici nous allons sélectionner un noeud
 	 */
 	public void selection() {
 	}
 
 	/**
-	 * Croisements
+	 * Croisements<br />
+	 * Fusion
 	 */
 	public void breading() {
 	}
@@ -139,19 +161,31 @@ public class NodeManager {
 	}
 
 	/**
-	 * Evaluation des performances des enfants
+	 * Evaluation des performances des enfants<br />
+	 * Calcul de la modularité locale pour chaques
 	 */
 	public void evaluationChild() {
 	}
 
 	/**
-	 * Sélection pour le remplacement
+	 * Sélection pour le remplacement<br />
+	 * Sélection de la meilleur modularité parmis ses voisins et remplacement si
+	 * besoin
 	 */
 	public void selectionReplacement() {
 	}
 
 	/**
-	 * Stop ?
+	 * Tant qu'il y a un noeud, on continue<br />
+	 * Tant qu'il y a eu un changement de communauté pour un des derniers noeud, on
+	 * continue<br />
+	 * Exemple:
+	 * <ul>
+	 * <li>On a 10 noeuds</li>
+	 * <li>La boucle boucle 10 fois MINIMUM</li>
+	 * <li>S'il y a eu au moins un changement de communauté durant ces 10 fois, on
+	 * reboucle 10 fois</li>
+	 * </ul>
 	 */
 	public void doWeStopNow() {
 	}
@@ -170,12 +204,28 @@ public class NodeManager {
 		return modularity;
 	}
 
-	public Collection<Node> getNodes() {
-		return nodes.values();
+	public int getNumberOfNodes() {
+		return nodes.length;
 	}
 
+	public Node[] getNodes() {
+		return nodes;
+	}
+
+	/**
+	 * @param id The id of the node
+	 * @return The node that has this id
+	 */
 	public Node getNode(int id) {
-		return nodes.get(id);
+		return nodes[id - 1];
+	}
+
+	/**
+	 * @param id The fakeId of the node
+	 * @return The node that has this fakeId
+	 */
+	public Node getFakeNode(int fakeId) {
+		return fakeIdNodes[fakeId - 1];
 	}
 
 	public Collection<Community> getCommunities() {
