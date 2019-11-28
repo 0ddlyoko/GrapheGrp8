@@ -10,6 +10,7 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.umons.graphegrp8.file.ReadFile;
 import be.umons.graphegrp8.node.Community;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeManager;
@@ -19,8 +20,8 @@ public class NodeManagerTest {
 
 	@Before
 	public void setUp() {
-		nodeManager = new NodeManager(new File(
-				"src" + File.separator + "test" + File.separator + "resources" + File.separator + "File1.txt"));
+		nodeManager = new NodeManager(new ReadFile(new File(
+				"src" + File.separator + "test" + File.separator + "resources" + File.separator + "File1.txt")));
 		nodeManager.loadNodes();
 		nodeManager.loadEdges();
 	}

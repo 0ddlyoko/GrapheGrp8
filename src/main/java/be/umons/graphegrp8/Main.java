@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import be.umons.graphegrp8.file.ReadFile;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeManager;
 
@@ -13,7 +14,7 @@ public class Main {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	public Main() {
-		NodeManager nm = new NodeManager(new File("src/main/resources/graphs/files/File1.txt"));
+		NodeManager nm = new NodeManager(new ReadFile(new File("src/main/resources/graphs/files/File1.txt")));
 		nm.load();
 		nm.start();
 		for (int i = 0; i < nm.getNumberOfNodes(); i++) {
@@ -23,19 +24,19 @@ public class Main {
 //		ReadFile rf = new ReadFile("src/main/resources/graphs/files/File1.txt");
 //		Modularity mod = new Modularity(rf);
 
-		LOG.info("{} edges", nm.getReadFile().getNbEdges());
-		LOG.info("{} vertices", nm.getReadFile().getNbVertices());
+		LOG.info("{} edges", nm.getFileParser().getNbEdges());
+		LOG.info("{} vertices", nm.getFileParser().getNbVertices());
 
 		LOG.info("HeadTab: ");
-		for (Integer elt : nm.getReadFile().getHeadTab())
+		for (Integer elt : nm.getFileParser().getHeadTab())
 			System.out.print(elt + " ");
 		System.out.println();
 		LOG.info("SuccTab: ");
-		for (Integer elt : nm.getReadFile().getSuccTab())
+		for (Integer elt : nm.getFileParser().getSuccTab())
 			System.out.print(elt + " ");
 		System.out.println();
 		LOG.info("Table de dégré: ");
-		for (Integer elt : nm.getReadFile().buildTabDegree())
+		for (Integer elt : nm.getFileParser().getDegTab())
 			System.out.print(elt + " ");
 		System.out.println();
 		LOG.info("Matrice adjacente initiale: ");

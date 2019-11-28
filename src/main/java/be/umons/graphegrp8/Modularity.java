@@ -2,7 +2,7 @@ package be.umons.graphegrp8;
 
 import java.util.ArrayList;
 
-import be.umons.graphegrp8.file.ReadFile;
+import be.umons.graphegrp8.file.FileParser;
 
 public class Modularity {
 	private int[][] matrixAdj;
@@ -13,9 +13,9 @@ public class Modularity {
 	 * constructor
 	 * @param rd class to read a file and initialize the head table, the successor table and the degree table
 	 */
-	public Modularity(ReadFile rd){
-		initMatrixAdj(rd.getNbVertices(),rd.getHeadTab(),rd.getSuccTab());
-		initMatrixProb(rd.getNbVertices(), rd.getDegTab(),rd.getNbEdges());
+	public Modularity(FileParser fp){
+		initMatrixAdj(fp.getNbVertices(), fp.getHeadTab(), fp.getSuccTab());
+		initMatrixProb(fp.getNbVertices(), fp.getDegTab(), fp.getNbEdges());
 	}
 	
 	/**

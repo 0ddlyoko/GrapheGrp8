@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.umons.graphegrp8.Modularity;
+import be.umons.graphegrp8.file.FileParser;
 import be.umons.graphegrp8.file.ReadFile;
 
 public class NodeManager {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
-	private File file;
-	private ReadFile readFile;
+	private FileParser fileParser;
 	private Modularity modularity;
 	private Node[] nodes;
 	private Node[] fakeIdNodes;
@@ -24,9 +24,8 @@ public class NodeManager {
 	// The current node
 	private Node selectedNode;
 
-	public NodeManager(File file) {
-		this.file = file;
-		this.readFile = new ReadFile(file);
+	public NodeManager(FileParser fileParser) {
+		this.fileParser = fileParser;
 		this.communities = new HashMap<Integer, Community>();
 	}
 
@@ -36,8 +35,8 @@ public class NodeManager {
 	public void load() {
 		LOG.info("Loading NodeManager");
 		// Create the Modularity
-		modularity = new Modularity(readFile);
-		LOG.info("{} nodes loaded", readFile.getNbVertices());
+		modularity = new Modularity(fileParser);
+		LOG.info("{} nodes loaded", fileParser.getNbVertices());
 		loadNodes();
 		loadEdges();
 	}
@@ -46,10 +45,10 @@ public class NodeManager {
 	 * Load nodes
 	 */
 	public void loadNodes() {
-		LOG.info("Loading {} nodes", readFile.getNbVertices());
-		this.nodes = new Node[readFile.getNbVertices()];
-		this.fakeIdNodes = new Node[readFile.getNbVertices()];
-		for (int i = 1; i <= readFile.getNbVertices(); i++) {
+		LOG.info("Loading {} nodes", fileParser.getNbVertices());
+		this.nodes = new Node[fileParser.getNbVertices()];
+		this.fakeIdNodes = new Node[fileParser.getNbVertices()];
+		for (int i = 1; i <= fileParser.getNbVertices(); i++) {
 			LOG.info("Loading node {}", i);
 			// Create community
 			Community c = new Community(i);
@@ -67,11 +66,11 @@ public class NodeManager {
 	 */
 	public void loadEdges() {
 		// Create all nodes
-		int[] head = readFile.getHeadTab();
-		int[] succ = readFile.getSuccTab();
+		int[] head = fileParser.getHeadTab();
+		int[] succ = fileParser.getSuccTab();
 		// Add neighbors
 		// For each node
-		LOG.info("Loading {} edges for {} nodes", readFile.getNbEdges(), readFile.getNbVertices());
+		LOG.info("Loading {} edges for {} nodes", fileParser.getNbEdges(), fileParser.getNbVertices());
 		for (int i = 0; i < nodes.length; i++) {
 			LOG.info("  - Node {} with {} neighbors", i + 1, head[i + 1] - head[i]);
 			Node n = nodes[i];
@@ -227,12 +226,8 @@ public class NodeManager {
 
 	// Getters
 
-	public File getFile() {
-		return file;
-	}
-
-	public ReadFile getReadFile() {
-		return readFile;
+	public FileParser getFileParser() {
+		return fileParser;
 	}
 
 	public Modularity getModularity() {
