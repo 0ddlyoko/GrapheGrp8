@@ -2,6 +2,8 @@ package be.umons.graphegrp8;
 
 import java.util.ArrayList;
 
+import be.umons.graphegrp8.file.ReadFile;
+
 public class Modularity {
 	private int[][] matrixAdj;
 

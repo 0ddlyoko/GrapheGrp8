@@ -1,4 +1,4 @@
-package be.umons.graphegrp8;
+package be.umons.graphegrp8.node;
 
 import java.util.Collection;
 import java.util.HashMap;

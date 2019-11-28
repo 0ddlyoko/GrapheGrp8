@@ -1,4 +1,4 @@
-package be.umons.graphegrp8;
+package be.umons.graphegrp8.file;
 
 import java.io.BufferedReader;
 import java.io.File;
@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  * class to read a file and initialize the head table, the successor table and
  * the degree table
  */
-public class ReadFile {
+public class ReadFile implements FileParser {
 	private int[] headTab;
 	private int[] succTab;
 	private int[] degTab;
@@ -24,8 +24,14 @@ public class ReadFile {
 	}
 
 	public ReadFile(File file) {
+		parse(file);
+	}
+
+	@Override
+	public void parse(File file) {
 		try {
 			Pattern space = Pattern.compile(" ");
+
 			BufferedReader in = new BufferedReader(new FileReader(file));
 			nbEdges = Integer.parseInt(space.split(in.readLine())[0]);
 			nbVertices = Integer.parseInt(space.split(in.readLine())[0]);
@@ -69,24 +75,28 @@ public class ReadFile {
 		return tab;
 	}
 
+	@Override
 	public int[] getHeadTab() {
 		return headTab;
 	}
 
+	@Override
 	public int getNbEdges() {
 		return nbEdges;
 	}
 
+	@Override
 	public int getNbVertices() {
 		return nbVertices;
 	}
 
+	@Override
 	public int[] getSuccTab() {
 		return succTab;
 	}
 
+	@Override
 	public int[] getDegTab() {
 		return degTab;
 	}
-
 }

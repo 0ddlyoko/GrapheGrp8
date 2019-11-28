@@ -10,6 +10,10 @@ import java.io.File;
 import org.junit.Before;
 import org.junit.Test;
 
+import be.umons.graphegrp8.node.Community;
+import be.umons.graphegrp8.node.Node;
+import be.umons.graphegrp8.node.NodeManager;
+
 public class NodeManagerTest {
 	private NodeManager nodeManager;
 

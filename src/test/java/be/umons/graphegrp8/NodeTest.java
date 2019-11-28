@@ -5,6 +5,8 @@ import static org.junit.Assert.assertEquals;
 import org.junit.BeforeClass;
 import org.junit.Test;
 
+import be.umons.graphegrp8.node.Node;
+
 public class NodeTest {
 	private static Node[] nodes;
 
