@@ -12,20 +12,12 @@ import java.util.regex.Pattern;
  * the degree table
  */
 public class ReadFile implements FileParser {
-	private int[] headTab;
-	private int[] succTab;
-	private int[] degTab;
+	protected int[] headTab;
+	protected int[] succTab;
+	protected int[] degTab;
 
-	private int nbEdges;
-	private int nbVertices;
-
-	public ReadFile(String filePath) {
-		this(new File(filePath));
-	}
-
-	public ReadFile(File file) {
-		parse(file);
-	}
+	protected int nbEdges;
+	protected int nbVertices;
 
 	@Override
 	public void parse(File file) {
@@ -33,10 +25,10 @@ public class ReadFile implements FileParser {
 			Pattern space = Pattern.compile(" ");
 
 			BufferedReader in = new BufferedReader(new FileReader(file));
-			nbEdges = Integer.parseInt(space.split(in.readLine())[0]);
-			nbVertices = Integer.parseInt(space.split(in.readLine())[0]);
-			headTab = StringTabToIntTab(space.split(in.readLine()));
-			succTab = StringTabToIntTab(space.split(in.readLine()));
+			nbEdges = Integer.parseInt(space.split(in.readLine().trim())[0]);
+			nbVertices = Integer.parseInt(space.split(in.readLine().trim())[0]);
+			headTab = StringTabToIntTab(space.split(in.readLine().trim()));
+			succTab = StringTabToIntTab(space.split(in.readLine().trim()));
 			degTab = buildTabDegree();
 			in.close();
 
@@ -52,7 +44,7 @@ public class ReadFile implements FileParser {
 	 * @param tab table of String
 	 * @return table of integers
 	 */
-	private int[] StringTabToIntTab(String[] tab) {
+	protected int[] StringTabToIntTab(String[] tab) {
 		int[] res = new int[tab.length];
 		int i = 0;
 		for (String elt : tab) {

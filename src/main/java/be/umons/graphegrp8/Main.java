@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import be.umons.graphegrp8.file.ReadFile;
+import be.umons.graphegrp8.file.ReadOtherFile;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeManager;
 
@@ -14,7 +14,11 @@ public class Main {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	public Main() {
-		NodeManager nm = new NodeManager(new ReadFile(new File("src/main/resources/graphs/files/File1.txt")));
+//		ReadFile rf = new ReadFile();
+//		rf.parse(new File("src/main/resources/graphs/files/File1.txt"));
+		ReadOtherFile rf = new ReadOtherFile();
+		rf.parse(new File("src/main/resources/graphs/files/others/File1.txt"));
+		NodeManager nm = new NodeManager(rf);
 		nm.load();
 		nm.start();
 		for (int i = 0; i < nm.getNumberOfNodes(); i++) {

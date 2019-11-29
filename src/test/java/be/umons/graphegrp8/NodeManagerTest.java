@@ -20,8 +20,10 @@ public class NodeManagerTest {
 
 	@Before
 	public void setUp() {
-		nodeManager = new NodeManager(new ReadFile(new File(
-				"src" + File.separator + "test" + File.separator + "resources" + File.separator + "File1.txt")));
+		ReadFile readFile = new ReadFile();
+		readFile.parse(new File(
+				"src" + File.separator + "test" + File.separator + "resources" + File.separator + "File1.txt"));
+		nodeManager = new NodeManager(readFile);
 		nodeManager.loadNodes();
 		nodeManager.loadEdges();
 	}
