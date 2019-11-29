@@ -1,12 +1,15 @@
 package be.umons.graphegrp8;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 
 import be.umons.graphegrp8.file.FileParser;
+import be.umons.graphegrp8.node.Community;
+
 
 public class Modularity {
+	private int nbEdges;
 	private int[][] matrixAdj;
-
 	private double[][] matrixProb;
 	
 	/**
@@ -14,8 +17,9 @@ public class Modularity {
 	 * @param rd class to read a file and initialize the head table, the successor table and the degree table
 	 */
 	public Modularity(FileParser fp){
+		nbEdges = fp.getNbEdges();
 		initMatrixAdj(fp.getNbVertices(), fp.getHeadTab(), fp.getSuccTab());
-		initMatrixProb(fp.getNbVertices(), fp.getDegTab(), fp.getNbEdges());
+		initMatrixProb(fp.getNbVertices(), fp.getDegTab(), nbEdges);
 	}
 	
 	/**
@@ -45,6 +49,9 @@ public class Modularity {
 				matrixProb[j][i] = matrixProb[i][j] = deg[i] * deg[j] / (2.0 * m);
 			}
 		}
+		for(int i = 0; i < size_; i++) {
+			matrixProb[i][i] = deg[i] * deg[i] / (2.0 * m);
+		}
 	}
 	/**
 	 * generates a probability matrix corresponding to the vertices passed in parameter
@@ -52,17 +59,17 @@ public class Modularity {
 	 * @return probability matrix
 	 */
 	public double[][] verticeToMatrixProb(ArrayList<Integer> vertice){
-		double[][] matrixDeg = new double[vertice.size()][vertice.size()];
+		double[][] matrixProbTemp = new double[vertice.size()][vertice.size()];
 		int i = 0;
 		for(Integer vertice_i : vertice) {
 			int j = 0;
 			for(Integer vertice_j : vertice) {
-				matrixDeg[i][j] = matrixProb[vertice_i - 1][vertice_j - 1];
+				matrixProbTemp[i][j] = matrixProb[vertice_i - 1][vertice_j - 1];
 				j++;
 			}
 			i++;
 		}
-		return matrixDeg;
+		return matrixProbTemp;
 		
 	}
 	/**
@@ -84,6 +91,30 @@ public class Modularity {
 		
 		return matrixAdjTemp;
 	}
+	/**
+	 * calculates the modularity of the partition in parameter
+	 * @param partition partition(s)
+	 * @return value of modularity
+	 */
+	public double resultOfModularity(ArrayList<Community> partition) {
+		double result = 0;
+		Iterator<Community> it = partition.iterator();
+		while(it.hasNext()) {
+			Community community = it.next();
+			ArrayList<Integer> vertice = community.getArrayOfNodes();
+			int[][] matrixAdjTemp = verticeToMatrixAdj(vertice);
+			double[][] matrixProbTemp = verticeToMatrixProb(vertice);
+			for(int i = 0; i < vertice.size(); i++) {
+				double colSom = 0;
+				for(int j = 0; j < vertice.size(); j++) {
+					colSom += matrixAdjTemp[i][j] - matrixProbTemp[i][j];
+				}
+				result += colSom;
+			}
+		}
+		return result/(2.0 * nbEdges);
+	}
+	
 	
 	public int[][] getMatrixAdj() {
 		return matrixAdj;

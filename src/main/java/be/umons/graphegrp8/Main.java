@@ -2,11 +2,14 @@ package be.umons.graphegrp8;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import be.umons.graphegrp8.file.ReadFile;
 import be.umons.graphegrp8.file.ReadOtherFile;
+import be.umons.graphegrp8.node.Community;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeManager;
 
@@ -14,10 +17,10 @@ public class Main {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
 
 	public Main() {
-//		ReadFile rf = new ReadFile();
-//		rf.parse(new File("src/main/resources/graphs/files/File1.txt"));
-		ReadOtherFile rf = new ReadOtherFile();
-		rf.parse(new File("src/main/resources/graphs/files/others/File1.txt"));
+		ReadFile rf = new ReadFile();
+		rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
+		//ReadOtherFile rf = new ReadOtherFile();
+		//rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
 		NodeManager nm = new NodeManager(rf);
 		nm.load();
 		nm.start();
@@ -58,7 +61,7 @@ public class Main {
 		}
 		System.out.println();
 
-		ArrayList<Integer> sommet = new ArrayList<Integer>();
+/*		ArrayList<Integer> sommet = new ArrayList<Integer>();
 		sommet.add(16);
 		sommet.add(4);
 		sommet.add(15);
@@ -78,9 +81,22 @@ public class Main {
 				System.out.printf("%.2f ", e);
 			System.out.println();
 		}
+*/		Community p1 = new Community(1);
+		p1.addNode(new Node(1));
+		p1.addNode(new Node(2));
+		p1.addNode(new Node(3));
+		Community p2 = new Community(2);
+		p2.addNode(new Node(4));
+		p2.addNode(new Node(5));
+		p2.addNode(new Node(6));
+		ArrayList<Community> p= new ArrayList<Community>();
+		p.add(p1);
+		p.add(p2);
+		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ",nm.getModularity().resultOfModularity(p));
 	}
 
 	public static void main(String[] args) {
+		
 		new Main();
 	}
 }
