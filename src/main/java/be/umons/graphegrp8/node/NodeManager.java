@@ -1,6 +1,7 @@
 package be.umons.graphegrp8.node;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
@@ -126,11 +127,13 @@ public class NodeManager {
 		// Done, call evaluation
 		evaluation();
 		do {
+			int i=0;
 			// Selection
 			selection();
-		//	breading();
-		//	mutation();
-		//	evaluationChild();
+			breading();
+			ArrayList<Integer> tabOfIdCommunities = mutation();
+			evaluationChild(tabOfIdCommunities);
+			System.out.println("hello comm "+this.edited);
 		} while (!doWeStopNow());
 	}
 
@@ -177,17 +180,22 @@ public class NodeManager {
 	 * Ici nous allons sélectionner un noeud
 	 */
 	public void selection() {
+		
 		if (fakeIdNodes.length == 0) {
 			// Whut ?
 			return;
 		}
-		if (selectedNode == null)
+		if (selectedNode == null) {
 			selectedNode = fakeIdNodes[0];
+		}
 		else {
 			// Test if it's the last one
-			if (selectedNode.getFakeId() == fakeIdNodes.length)
+			if (selectedNode.getFakeId() == fakeIdNodes.length) {
 				// Last one so here we go back to first one
 				selectedNode = fakeIdNodes[0];
+				edited = false;
+			}
+				
 			else
 				// Not last one so we take the next one
 				selectedNode = fakeIdNodes[selectedNode.getFakeId()];
@@ -207,16 +215,31 @@ public class NodeManager {
 	}
 
 	/**
-	 * Mutations
+	 * Mutations: on va construire une HashMap de communauté 
+	 * (noeud courant associé à chaque voisin se trouvant deja dans une communauté
+	 * et c'est avec cette hashmap qu'on évaluara les performances 
 	 */
-	public void mutation() {
+	public ArrayList<Integer> mutation() {
+		ArrayList<Integer> tabOfIdCommunities = new ArrayList<Integer>();
+		for(Node node : selectedNode.getNeighbors()) {
+			tabOfIdCommunities.add(node.getCommunity().getId());
+		}
+		return tabOfIdCommunities;
 	}
 
 	/**
 	 * Evaluation des performances des enfants<br />
 	 * Calcul de la modularité locale pour chaques
 	 */
-	public void evaluationChild() {
+	public void evaluationChild(ArrayList<Integer> indexCommunity) {
+		for(Integer i : indexCommunity) {
+			HashMap<Integer, Community>partition = new HashMap<Integer, Community>();
+			partition.put(i, communities.get(i));
+			double mod = modularity.resultOfModularity(partition);
+			communities.get(i).setCommunityCost(mod);
+		}
+		
+		
 	}
 
 	/**
@@ -224,7 +247,32 @@ public class NodeManager {
 	 * Sélection de la meilleur modularité parmis ses voisins et remplacement si
 	 * besoin
 	 */
-	public void selectionReplacement() {
+	public void selectionReplacement(ArrayList<Integer> indexCommunity) {
+		
+		//s'il y'a un remplacement à effectuer alors 
+		//on recuperer la communauté de destination ensuite 
+		//on after tempCommunities à communities
+		//en fin on appel changecommunity(avec selected node et la communauté dest)
+		//sinon on appele pas changeCommunitie()
+		
+		double maxCost = selectedNode.getCommunity().getCommunityCost();
+		Community dest = null;
+		for(Integer i : indexCommunity) {
+			double currentCost = communities.get(i).getCommunityCost();
+			if(currentCost > 0 && currentCost > maxCost) {
+				maxCost = currentCost;
+				dest = communities.get(i);
+			}
+		}
+		communities = tempCommunities;
+		if(dest != null) {
+			changeCommunity(this.selectedNode, dest);
+			evaluation();
+			selectedNode.setFakeId(selectedNode.getFakeId() + 1);
+			edited = true;
+		}
+		
+		
 	}
 
 	/**
