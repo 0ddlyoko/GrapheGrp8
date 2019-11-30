@@ -7,10 +7,12 @@ import java.util.HashMap;
 public class Community {
 	private int id;
 	private HashMap<Integer, Node> nodes;
+	private double communityCost;
 
 	public Community(int id) {
 		this.id = id;
 		this.nodes = new HashMap<Integer, Node>();
+		this.communityCost = -1;
 	}
 
 	/**
@@ -71,5 +73,13 @@ public class Community {
 	@Override
 	public int hashCode() {
 		return id;
+	}
+
+	public double getCommunityCost() {
+		return communityCost;
+	}
+
+	public void setCommunityCost(double communityCost) {
+		this.communityCost = communityCost;
 	}
 }

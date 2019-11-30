@@ -1,7 +1,9 @@
 package be.umons.graphegrp8;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
 
 import be.umons.graphegrp8.file.FileParser;
 import be.umons.graphegrp8.node.Community;
@@ -96,11 +98,10 @@ public class Modularity {
 	 * @param partition partition(s)
 	 * @return value of modularity
 	 */
-	public double resultOfModularity(ArrayList<Community> partition) {
+	public double resultOfModularity(HashMap<Integer, Community> partition) {
 		double result = 0;
-		Iterator<Community> it = partition.iterator();
-		while(it.hasNext()) {
-			Community community = it.next();
+		for(Map.Entry<Integer, Community> entry : partition.entrySet()) {
+			Community community = entry.getValue();
 			ArrayList<Integer> vertice = community.getArrayOfNodes();
 			int[][] matrixAdjTemp = verticeToMatrixAdj(vertice);
 			double[][] matrixProbTemp = verticeToMatrixProb(vertice);

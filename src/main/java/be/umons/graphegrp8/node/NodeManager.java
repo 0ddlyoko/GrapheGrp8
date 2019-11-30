@@ -1,8 +1,10 @@
 package be.umons.graphegrp8.node;
 
-import java.io.File;
+
 import java.util.Collection;
 import java.util.HashMap;
+
+import java.util.Map.Entry;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -19,9 +21,10 @@ public class NodeManager {
 	private Node[] nodes;
 	private Node[] fakeIdNodes;
 	private HashMap<Integer, Community> communities;
+	private HashMap<Integer, Community> tempCommunities;
 	// If true, a node has changed community
 	private boolean edited;
-	// The current node
+	/** The current node*/
 	private Node selectedNode;
 
 	public NodeManager(FileParser fileParser) {
@@ -115,7 +118,8 @@ public class NodeManager {
 	// Algorithme Evolutionnaire
 
 	/**
-	 * Start the algorithm
+	 * Start the algorithm 
+	 * first phase
 	 */
 	public void start() {
 		initialization();
@@ -124,6 +128,9 @@ public class NodeManager {
 		do {
 			// Selection
 			selection();
+		//	breading();
+		//	mutation();
+		//	evaluationChild();
 		} while (!doWeStopNow());
 	}
 
@@ -155,6 +162,14 @@ public class NodeManager {
 	 * Ici nous allons calculer la modularité
 	 */
 	public void evaluation() {
+		LOG.info("begin evaluation of performances ...");
+		for(Entry<Integer, Community> entry : communities.entrySet()) {
+			HashMap<Integer, Community> partition = new HashMap<Integer, Community>();
+			partition.put(entry.getKey(), entry.getValue());
+			double mod = modularity.resultOfModularity(partition);
+			entry.getValue().setCommunityCost(mod);
+		}
+		LOG.info("end evaluation !");
 	}
 
 	/**
@@ -181,10 +196,14 @@ public class NodeManager {
 	}
 
 	/**
-	 * Croisements<br />
+	 * Croisements du noeud courant avec ses noeuds adjacents<br />
 	 * Fusion
 	 */
 	public void breading() {
+		tempCommunities = new HashMap<Integer, Community>(communities);
+		for(Node node : selectedNode.getNeighbors()) {
+			node.getCommunity().addNode(selectedNode);
+		}
 	}
 
 	/**
