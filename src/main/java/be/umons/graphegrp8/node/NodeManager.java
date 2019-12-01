@@ -4,8 +4,7 @@ package be.umons.graphegrp8.node;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-
-import java.util.Map.Entry;
+import java.util.List;
 import java.util.Random;
 
 import org.slf4j.Logger;
@@ -13,7 +12,6 @@ import org.slf4j.LoggerFactory;
 
 import be.umons.graphegrp8.Modularity;
 import be.umons.graphegrp8.file.FileParser;
-import be.umons.graphegrp8.file.ReadFile;
 
 public class NodeManager {
 	private final Logger LOG = LoggerFactory.getLogger(getClass());
@@ -127,13 +125,13 @@ public class NodeManager {
 		// Done, call evaluation
 		evaluation();
 		do {
-			int i=0;
-			// Selection
+			int i = 0;
+			// Selecting a node
 			selection();
 			breading();
-			ArrayList<Integer> tabOfIdCommunities = mutation();
+			List<Integer> tabOfIdCommunities = mutation();
 			evaluationChild(tabOfIdCommunities);
-			System.out.println("hello comm "+this.edited);
+			LOG.info("hello comm {}", edited);
 		} while (!doWeStopNow());
 	}
 
@@ -162,17 +160,13 @@ public class NodeManager {
 
 	/**
 	 * Evaluation des performances des individus<br />
-	 * Ici nous allons calculer la modularité
+	 * Ici nous allons calculer la modularité pour chaque noeud
 	 */
 	public void evaluation() {
-		LOG.info("begin evaluation of performances ...");
-		for(Entry<Integer, Community> entry : communities.entrySet()) {
-			HashMap<Integer, Community> partition = new HashMap<Integer, Community>();
-			partition.put(entry.getKey(), entry.getValue());
-			double mod = modularity.resultOfModularity(partition);
-			entry.getValue().setCommunityCost(mod);
-		}
-		LOG.info("end evaluation !");
+		LOG.info("Calculating modularity for each communities ...");
+		for(Community community : communities.values())
+			community.setCommunityCost(modularity.resultOfModularity(community));
+		LOG.info("Done !");
 	}
 
 	/**
@@ -180,7 +174,6 @@ public class NodeManager {
 	 * Ici nous allons sélectionner un noeud
 	 */
 	public void selection() {
-		
 		if (fakeIdNodes.length == 0) {
 			// Whut ?
 			return;
@@ -219,7 +212,7 @@ public class NodeManager {
 	 * (noeud courant associé à chaque voisin se trouvant deja dans une communauté
 	 * et c'est avec cette hashmap qu'on évaluara les performances 
 	 */
-	public ArrayList<Integer> mutation() {
+	public List<Integer> mutation() {
 		ArrayList<Integer> tabOfIdCommunities = new ArrayList<Integer>();
 		for(Node node : selectedNode.getNeighbors()) {
 			tabOfIdCommunities.add(node.getCommunity().getId());
@@ -231,15 +224,9 @@ public class NodeManager {
 	 * Evaluation des performances des enfants<br />
 	 * Calcul de la modularité locale pour chaques
 	 */
-	public void evaluationChild(ArrayList<Integer> indexCommunity) {
-		for(Integer i : indexCommunity) {
-			HashMap<Integer, Community>partition = new HashMap<Integer, Community>();
-			partition.put(i, communities.get(i));
-			double mod = modularity.resultOfModularity(partition);
-			communities.get(i).setCommunityCost(mod);
-		}
-		
-		
+	public void evaluationChild(List<Integer> indexCommunity) {
+		for(Integer i : indexCommunity)
+			communities.get(i).setCommunityCost(modularity.resultOfModularity(communities.get(i)));
 	}
 
 	/**
@@ -247,7 +234,7 @@ public class NodeManager {
 	 * Sélection de la meilleur modularité parmis ses voisins et remplacement si
 	 * besoin
 	 */
-	public void selectionReplacement(ArrayList<Integer> indexCommunity) {
+	public void selectionReplacement(List<Integer> indexCommunity) {
 		
 		//s'il y'a un remplacement à effectuer alors 
 		//on recuperer la communauté de destination ensuite 

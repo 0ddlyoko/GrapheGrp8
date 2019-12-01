@@ -2,6 +2,7 @@ package be.umons.graphegrp8;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 
 import org.slf4j.Logger;
@@ -89,10 +90,7 @@ public class Main {
 		p2.addNode(new Node(4));
 		p2.addNode(new Node(5));
 		p2.addNode(new Node(6));
-		HashMap<Integer, Community> p= new HashMap<Integer, Community>();
-		p.put(1, p1);
-		p.put(2, p2);
-		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ",nm.getModularity().resultOfModularity(p));
+		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2)));
 	}
 
 	public static void main(String[] args) {

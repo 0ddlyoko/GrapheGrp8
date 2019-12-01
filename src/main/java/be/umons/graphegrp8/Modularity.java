@@ -1,9 +1,8 @@
 package be.umons.graphegrp8;
 
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.Collection;
+import java.util.List;
 
 import be.umons.graphegrp8.file.FileParser;
 import be.umons.graphegrp8.node.Community;
@@ -60,7 +59,7 @@ public class Modularity {
 	 * @param vertice vertex table (with number 1 as the min vertex)
 	 * @return probability matrix
 	 */
-	public double[][] verticeToMatrixProb(ArrayList<Integer> vertice){
+	public double[][] verticeToMatrixProb(List<Integer> vertice){
 		double[][] matrixProbTemp = new double[vertice.size()][vertice.size()];
 		int i = 0;
 		for(Integer vertice_i : vertice) {
@@ -79,7 +78,7 @@ public class Modularity {
 	 * @param vertice vertex table (with number 1 as the min vertex)
 	 * @return adjacent matrix
 	 */
-	public int[][] verticeToMatrixAdj(ArrayList<Integer> vertice){
+	public int[][] verticeToMatrixAdj(List<Integer> vertice){
 		int[][] matrixAdjTemp = new int[vertice.size()][vertice.size()];
 		int i = 0;
 		for(Integer vertice_i : vertice) {
@@ -93,29 +92,40 @@ public class Modularity {
 		
 		return matrixAdjTemp;
 	}
+	
 	/**
-	 * calculates the modularity of the partition in parameter
-	 * @param partition partition(s)
-	 * @return value of modularity
+	 * Calculate the modularity for a partition of communities
+	 * 
+	 * @param partition The partition of communities
+	 * @return The modularity for specific partition
 	 */
-	public double resultOfModularity(HashMap<Integer, Community> partition) {
+	public double resultOfModularity(Collection<Community> partition) {
 		double result = 0;
-		for(Map.Entry<Integer, Community> entry : partition.entrySet()) {
-			Community community = entry.getValue();
-			ArrayList<Integer> vertice = community.getArrayOfNodes();
-			int[][] matrixAdjTemp = verticeToMatrixAdj(vertice);
-			double[][] matrixProbTemp = verticeToMatrixProb(vertice);
-			for(int i = 0; i < vertice.size(); i++) {
-				double colSom = 0;
-				for(int j = 0; j < vertice.size(); j++) {
-					colSom += matrixAdjTemp[i][j] - matrixProbTemp[i][j];
-				}
-				result += colSom;
-			}
-		}
-		return result/(2.0 * nbEdges);
+		for (Community community : partition)
+			result += resultOfModularity(community);
+		return result;
 	}
 	
+	/**
+	 * Calculate the modularity for specific community
+	 * 
+	 * @param community The community
+	 * @return The modularity for specific community
+	 */
+	public double resultOfModularity(Community community) {
+		double result = 0;
+		ArrayList<Integer> vertice = community.getArrayOfNodes();
+		int[][] matrixAdjTemp = verticeToMatrixAdj(vertice);
+		double[][] matrixProbTemp = verticeToMatrixProb(vertice);
+		for (int i = 0; i < vertice.size(); i++) {
+			double colSom = 0;
+			for (int j = 0; j < vertice.size(); j++) {
+				colSom += matrixAdjTemp[i][j] - matrixProbTemp[i][j];
+			}
+			result += colSom;
+		}
+		return result / (2 * nbEdges);
+	}
 	
 	public int[][] getMatrixAdj() {
 		return matrixAdj;
