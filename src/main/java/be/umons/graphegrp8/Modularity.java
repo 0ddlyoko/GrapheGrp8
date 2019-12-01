@@ -114,7 +114,7 @@ public class Modularity {
 	 */
 	public double resultOfModularity(Community community) {
 		double result = 0;
-		ArrayList<Integer> vertice = community.getArrayOfNodes();
+		List<Integer> vertice = community.getArrayOfNodes();
 		int[][] matrixAdjTemp = verticeToMatrixAdj(vertice);
 		double[][] matrixProbTemp = verticeToMatrixProb(vertice);
 		for (int i = 0; i < vertice.size(); i++) {

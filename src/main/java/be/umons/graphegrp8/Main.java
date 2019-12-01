@@ -1,15 +1,11 @@
 package be.umons.graphegrp8;
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.umons.graphegrp8.file.ReadFile;
-import be.umons.graphegrp8.file.ReadOtherFile;
 import be.umons.graphegrp8.node.Community;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeManager;
@@ -82,15 +78,28 @@ public class Main {
 				System.out.printf("%.2f ", e);
 			System.out.println();
 		}
-*/		Community p1 = new Community(1);
-		p1.addNode(new Node(1));
-		p1.addNode(new Node(2));
-		p1.addNode(new Node(3));
-		Community p2 = new Community(2);
-		p2.addNode(new Node(4));
-		p2.addNode(new Node(5));
-		p2.addNode(new Node(6));
-		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2)));
+*/
+//		Community p1 = new Community(1);
+//		p1.addNode(new Node(1));
+//		p1.addNode(new Node(2));
+//		p1.addNode(new Node(3));
+//		Community p2 = new Community(2);
+//		p2.addNode(new Node(4));
+//		p2.addNode(new Node(5));
+//		p2.addNode(new Node(6));
+//		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2)));
+		
+		// TODO Save the modularity
+		LOG.info("Modularity = {}, # of communities = {}, communities: ", nm.getModularity().resultOfModularity(nm.getCommunities()), nm.getCommunities().size());
+		for (Community c : nm.getCommunities()) {
+			StringBuilder sb = new StringBuilder("{");
+			for (Node n : c.getNodes())
+				sb.append(n.getId()).append(", ");
+			// Remove last ", "
+			sb.setLength(sb.length() - 2);
+			sb.append("}");
+			LOG.info(" - {}: {}", c.getId(), sb.toString());
+		}
 	}
 
 	public static void main(String[] args) {

@@ -3,6 +3,7 @@ package be.umons.graphegrp8.node;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
+import java.util.List;
 
 public class Community {
 	private int id;
@@ -48,10 +49,9 @@ public class Community {
 		return nodes.values();
 	}
 	
-	public ArrayList<Integer> getArrayOfNodes(){
+	public List<Integer> getArrayOfNodes(){
 		ArrayList<Integer> nodesList = new ArrayList<Integer>();
-		ArrayList<Node> vertice = new ArrayList<Node>(nodes.values());
-		for(Node nod : vertice) {
+		for (Node nod : nodes.values()) {
 			nodesList.add(nod.getId());
 		}
 		return nodesList;
