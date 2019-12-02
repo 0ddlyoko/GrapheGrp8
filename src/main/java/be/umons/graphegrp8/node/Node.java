@@ -30,7 +30,7 @@ public class Node {
 	public int getId() {
 		return id;
 	}
-	//???????????
+	
 	public int getFakeId() {
 		return fakeId;
 	}

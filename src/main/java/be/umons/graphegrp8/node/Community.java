@@ -50,7 +50,7 @@ public class Community {
 	}
 	
 	public List<Integer> getArrayOfNodes(){
-		ArrayList<Integer> nodesList = new ArrayList<Integer>();
+		List<Integer> nodesList = new ArrayList<Integer>();
 		for (Node nod : nodes.values()) {
 			nodesList.add(nod.getId());
 		}

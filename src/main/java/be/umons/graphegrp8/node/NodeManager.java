@@ -27,17 +27,16 @@ public class NodeManager {
 
 	public NodeManager(FileParser fileParser) {
 		this.fileParser = fileParser;
-		this.communities = new HashMap<Integer, Community>();
 	}
 
 	/**
 	 * Load all
 	 */
 	public void load() {
-		LOG.info("Loading NodeManager");
+//		LOG.info("Loading NodeManager");
 		// Create the Modularity
 		modularity = new Modularity(fileParser);
-		LOG.info("{} nodes loaded", fileParser.getNbVertices());
+//		LOG.info("{} nodes loaded", fileParser.getNbVertices());
 		loadNodes();
 		loadEdges();
 	}
@@ -46,19 +45,17 @@ public class NodeManager {
 	 * Load nodes
 	 */
 	public void loadNodes() {
-		LOG.info("Loading {} nodes", fileParser.getNbVertices());
+//		LOG.info("Loading {} nodes", fileParser.getNbVertices());
+		// Clear (Garbage Collector)
 		this.nodes = new Node[fileParser.getNbVertices()];
 		this.fakeIdNodes = new Node[fileParser.getNbVertices()];
 		for (int i = 1; i <= fileParser.getNbVertices(); i++) {
-			LOG.info("Loading node {}", i);
+//			LOG.info("Loading node {}", i);
 			// Create community
-			Community c = new Community(i);
-			communities.put(c.getId(), c);
 			// Create node
 			Node n = new Node(i);
 			nodes[i - 1] = n;
 			fakeIdNodes[i - 1] = n;
-			changeCommunity(n, c);
 		}
 	}
 
@@ -71,16 +68,30 @@ public class NodeManager {
 		int[] succ = fileParser.getSuccTab();
 		// Add neighbors
 		// For each node
-		LOG.info("Loading {} edges for {} nodes", fileParser.getNbEdges(), fileParser.getNbVertices());
+//		LOG.info("Loading {} edges for {} nodes", fileParser.getNbEdges(), fileParser.getNbVertices());
 		for (int i = 0; i < nodes.length; i++) {
-			LOG.info("  - Node {} with {} neighbors", i + 1, head[i + 1] - head[i]);
+//			LOG.info("  - Node {} with {} neighbors", i + 1, head[i + 1] - head[i]);
 			Node n = nodes[i];
 			// For each neighbors
 			for (int j = head[i]; j < head[i + 1]; j++) {
-				LOG.info("    - => {}", succ[j - 1]);
+//				LOG.info("    - => {}", succ[j - 1]);
 				// A node
 				n.addNeighbors(nodes[succ[j - 1] - 1]);
 			}
+		}
+	}
+	
+	/**
+	 * Load communities
+	 */
+	public void loadCommunities() {
+		if (communities != null)
+			communities.clear();
+		communities = new HashMap<>();
+		for (int i = 0; i < nodes.length; i++) {
+			Community c = new Community(i);
+			communities.put(c.getId(), c);
+			c.addNode(nodes[i]);
 		}
 	}
 
@@ -129,17 +140,17 @@ public class NodeManager {
 		// Done, call evaluation
 		evaluation();
 		do {
-			int i = 0;
+//			int i = 0;
 			// Selecting a node
 			selection();
 			changeCommunityIfNeeds();
 //			breading();
 //			List<Integer> tabOfIdCommunities = mutation();
 //			evaluationChild(tabOfIdCommunities);
-			if (edited) {
-				LOG.info("A node has changed his community, looping again !");
-			}
-			LOG.info("hello comm {}", edited);
+//			if (edited) {
+//				LOG.info("A node has changed his community, looping again !");
+//			}
+//			LOG.info("hello comm {}", edited);
 		} while (!doWeStopNow());
 		// TODO Reduce nodes in same community to a single node
 	}
@@ -149,7 +160,7 @@ public class NodeManager {
 	 * Chaque noeud aura un id aléatoire unique
 	 */
 	public void initialization() {
-		LOG.info("Mixing the content ...");
+//		LOG.info("Mixing the content ...");
 		Random r = new Random();
 		int length = fakeIdNodes.length;
 		for (int i = 0; i < length; i++) {
@@ -164,7 +175,7 @@ public class NodeManager {
 			fakeIdNodes[i] = fakeIdNodes[rand];
 			fakeIdNodes[rand] = a;
 		}
-		LOG.info("Content mixed !");
+//		LOG.info("Content mixed !");
 	}
 
 	/**
@@ -172,10 +183,10 @@ public class NodeManager {
 	 * Ici nous allons calculer la modularité pour chaque noeud
 	 */
 	public void evaluation() {
-		LOG.info("Calculating modularity for each communities ...");
+//		LOG.info("Calculating modularity for each communities ...");
 		for (Community community : communities.values())
 			community.setCommunityCost(modularity.resultOfModularity(community));
-		LOG.info("Done !");
+//		LOG.info("Done !");
 	}
 
 	/**
@@ -199,7 +210,7 @@ public class NodeManager {
 				// Not last one so we take the next one
 				selectedNode = fakeIdNodes[selectedNode.getFakeId()];
 		}
-		LOG.info("Selecting {}", selectedNode);
+//		LOG.debug("Selecting {}", selectedNode);
 	}
 
 	/**
@@ -207,32 +218,36 @@ public class NodeManager {
 	 */
 	public void changeCommunityIfNeeds() {
 		Community current = selectedNode.getCommunity();
+		double currentModularity = current.getCommunityCost();
 		Community best = null;
 		double bestCost = -1;
 		
 		// For each neighbors calculate the new modularity if we change the community of the node
 		for (Node n : selectedNode.getNeighbors()) {
+//			LOG.debug("Boucle {}", n);
 			// Same community, don't check here
-			if (n.getCommunity() == current)
+			if (n.getCommunity().equals(current))
 				continue;
 			// The current cost
-			double oldCost = n.getCommunity().getCommunityCost() + current.getCommunityCost();
+			double oldCost = n.getCommunity().getCommunityCost() + currentModularity;
 			// Change community
 			changeCommunity(selectedNode, n.getCommunity(), false);
 			// Calculate new cost
 			double newCost = n.getCommunity().getCommunityCost() + current.getCommunityCost();
 			// New cost is greater than old cost
 			if (newCost > oldCost && (bestCost == -1 || newCost > bestCost)) {
+//				LOG.info("currentModularity = {}, current.getCommunityCost() = {}, oldCost = {}, newCost = {}, bestCost = {}, node = {}, to = {}", currentModularity, current.getCommunityCost(), oldCost, newCost, bestCost, current.getId(), n.getCommunity().getId());
 				best = n.getCommunity();
 				bestCost = newCost;
 			}
-			// Put back to old community
-			// TODO Put back only after the loop
 			changeCommunity(selectedNode, current, false);
 		}
+		// Put back to old community
+		// TODO Put back only after the loop
 		if (best != null) {
-			LOG.info("Found a better community for node {}. {} => {}", selectedNode.getId(), current.getId(), best.getId());
+//			LOG.debug("Found a better community for node {}. {} => {}", selectedNode.getId(), current.getId(), best.getId());
 			changeCommunity(selectedNode, best);
+//			LOG.info("Modularity = {}", getModularity().resultOfModularity(getCommunities()));
 			edited = true;
 		}
 	}

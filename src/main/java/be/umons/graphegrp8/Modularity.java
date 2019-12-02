@@ -1,6 +1,5 @@
 package be.umons.graphegrp8;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -49,11 +48,10 @@ public class Modularity {
 			for(int j = i + 1; j < size_; j++) {
 				matrixProb[j][i] = matrixProb[i][j] = deg[i] * deg[j] / (2.0 * m);
 			}
-		}
-		for(int i = 0; i < size_; i++) {
 			matrixProb[i][i] = deg[i] * deg[i] / (2.0 * m);
 		}
 	}
+	
 	/**
 	 * generates a probability matrix corresponding to the vertices passed in parameter
 	 * @param vertice vertex table (with number 1 as the min vertex)
@@ -61,14 +59,10 @@ public class Modularity {
 	 */
 	public double[][] verticeToMatrixProb(List<Integer> vertice){
 		double[][] matrixProbTemp = new double[vertice.size()][vertice.size()];
-		int i = 0;
-		for(Integer vertice_i : vertice) {
-			int j = 0;
-			for(Integer vertice_j : vertice) {
-				matrixProbTemp[i][j] = matrixProb[vertice_i - 1][vertice_j - 1];
-				j++;
+		for (int i = 0; i < vertice.size(); i++) {
+			for(int j = 0; j < vertice.size(); j++) {
+				matrixProbTemp[i][j] = matrixProb[vertice.get(i) - 1][vertice.get(j) - 1];
 			}
-			i++;
 		}
 		return matrixProbTemp;
 		
