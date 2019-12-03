@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import be.umons.graphegrp8.file.ReadFile;
+import be.umons.graphegrp8.file.ReadOtherFile;
 import be.umons.graphegrp8.node.Community;
 import be.umons.graphegrp8.node.Node;
 import be.umons.graphegrp8.node.NodeGroup;
@@ -17,8 +18,13 @@ public class Main {
 	private int i = 0;
 
 	public Main() {
-		ReadFile rf = new ReadFile();
-		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
+		ReadOtherFile rf = new ReadOtherFile();
+//		ReadFile rf = new ReadFile();
+		LOG.info("Parsing file ...");
+		long before = System.currentTimeMillis();
+//		rf.parse(new File("src/main/resources/graphs/files/File2.txt"));
+		rf.parse(new File("src/main/resources/graphs/files/others/Test.txt"));
+		LOG.info("Done in {} ms", (System.currentTimeMillis() - before));
 		// ReadOtherFile rf = new ReadOtherFile();
 		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
 		int count = 10000;
@@ -39,7 +45,7 @@ public class Main {
 		t.start();
 		for (; i < count; i++) {
 			nm.load();
-			long before = System.currentTimeMillis();
+			before = System.currentTimeMillis();
 			nm.start();
 			long after = System.currentTimeMillis();
 			double modularity = nm.getModularity().resultOfModularity(nm.getCommunities());

@@ -24,6 +24,8 @@ public class ReadOtherFile extends ReadFile {
 			BufferedReader in = new BufferedReader(new FileReader(file));
 			nbEdges = 0;
 			nbVertices = Integer.parseInt(in.readLine().trim());
+			boolean zero = "true".equalsIgnoreCase(in.readLine().trim());
+			System.out.println(zero ? "true" : "false");
 			this.map = new SortedSet[nbVertices];
 			String line;
 			while ((line = in.readLine()) != null) {
@@ -31,8 +33,8 @@ public class ReadOtherFile extends ReadFile {
 					break;
 				// Split line from space
 				String[] arr = space.split(line);
-				Integer first = Integer.parseInt(arr[0]);
-				Integer second = Integer.parseInt(arr[1]);
+				Integer first = Integer.parseInt(arr[0]) + (zero ? 1 : 0);
+				Integer second = Integer.parseInt(arr[1]) + (zero ? 1 : 0);
 				// Second is always < than first
 				if (map[first - 1] == null)
 					map[first - 1] = new TreeSet<Integer>();
@@ -47,6 +49,9 @@ public class ReadOtherFile extends ReadFile {
 			headTab = new int[map.length + 1];
 			int old = 1;
 			for (int i = 0; i < map.length; i++) {
+				// Single node
+				if (map[i] == null)
+					map[i] = new TreeSet<Integer>();
 				headTab[i] = old;
 				old += map[i].size();
 			}
