@@ -22,8 +22,12 @@ public class NodeManager {
 	private HashMap<Integer, Community> tempCommunities;
 	// If true, a node has changed community
 	private boolean edited;
+	// If true, a node has changed community
+	private boolean secondEdited;
 	/** The current node */
 	private Node selectedNode;
+
+	private int retry = 0;
 
 	public NodeManager(FileParser fileParser) {
 		this.fileParser = fileParser;
@@ -39,6 +43,7 @@ public class NodeManager {
 //		LOG.info("{} nodes loaded", fileParser.getNbVertices());
 		loadNodes();
 		loadEdges();
+		loadCommunities();
 	}
 
 	/**
@@ -49,14 +54,9 @@ public class NodeManager {
 		// Clear (Garbage Collector)
 		this.nodes = new Node[fileParser.getNbVertices()];
 		this.fakeIdNodes = new Node[fileParser.getNbVertices()];
-		for (int i = 1; i <= fileParser.getNbVertices(); i++) {
-//			LOG.info("Loading node {}", i);
-			// Create community
+		for (int i = 1; i <= fileParser.getNbVertices(); i++)
 			// Create node
-			Node n = new Node(i);
-			nodes[i - 1] = n;
-			fakeIdNodes[i - 1] = n;
-		}
+			fakeIdNodes[i - 1] = nodes[i - 1] = new Node(i);
 	}
 
 	/**
@@ -80,7 +80,7 @@ public class NodeManager {
 			}
 		}
 	}
-	
+
 	/**
 	 * Load communities
 	 */
@@ -136,14 +136,19 @@ public class NodeManager {
 	 * Start the algorithm first phase
 	 */
 	public void start() {
-		initialization();
-		// Done, call evaluation
-		evaluation();
+		boolean stop = false;
+		retry = 0;
 		do {
+//			LOG.info("count = {}", count);
+			secondEdited = false;
+			initialization();
+			// Done, call evaluation
+			evaluation();
+			do {
 //			int i = 0;
-			// Selecting a node
-			selection();
-			changeCommunityIfNeeds();
+				// Selecting a node
+				selection();
+				changeCommunityIfNeeds();
 //			breading();
 //			List<Integer> tabOfIdCommunities = mutation();
 //			evaluationChild(tabOfIdCommunities);
@@ -151,8 +156,60 @@ public class NodeManager {
 //				LOG.info("A node has changed his community, looping again !");
 //			}
 //			LOG.info("hello comm {}", edited);
-		} while (!doWeStopNow());
-		// TODO Reduce nodes in same community to a single node
+			} while (!doWeStopNow());
+
+			// Reduce nodes in same community
+			// Make a copy of communities
+			this.nodes = new Node[communities.size()];
+			this.fakeIdNodes = new Node[communities.size()];
+			// Create groups of nodes
+			int i = 0;
+			for (Community c : communities.values()) {
+				// Retrieving all nodes from communities
+				List<Node> nodes = new ArrayList<Node>();
+				for (Node node : c.getNodes()) {
+					if (node instanceof NodeGroup)
+						for (Node n : ((NodeGroup) node).getNodes()) {
+							// Save the current community of the node
+							n.setCommunity(c);
+							nodes.add(n);
+						}
+					else
+						nodes.add(node);
+				}
+				this.fakeIdNodes[i] = this.nodes[i] = new NodeGroup(i + 1, nodes);
+				// Reuse old community
+				c.clear();
+				changeCommunity(this.nodes[i], c);
+				i++;
+			}
+			// Neighbors
+			for (Community c : communities.values()) {
+				for (Node n : c.getNodes()) {
+					// Here we know that n is NodeGroup
+					NodeGroup ng = (NodeGroup) n;
+					for (Node n2 : ng.getNodes()) {
+						// Check neighbors
+						for (Node neighbor : n2.getNeighbors()) {
+							// Different community, add neighbor
+							if (neighbor.getCommunity().getId() != n2.getCommunity().getId()) {
+								// Community of n2 has always one element
+								Node other = neighbor.getCommunity().getNodes().iterator().next();
+								n.addNeighbors(other);
+								other.addNeighbors(n);
+							}
+						}
+					}
+				}
+			}
+			retry++;
+			// Reset selectedNode
+			selectedNode = null;
+		} while (secondEdited);
+
+//		} while (false);
+		if (stop)
+			System.exit(0);
 	}
 
 	/**
@@ -221,8 +278,9 @@ public class NodeManager {
 		double currentModularity = current.getCommunityCost();
 		Community best = null;
 		double bestCost = -1;
-		
-		// For each neighbors calculate the new modularity if we change the community of the node
+
+		// For each neighbors calculate the new modularity if we change the community of
+		// the node
 		for (Node n : selectedNode.getNeighbors()) {
 //			LOG.debug("Boucle {}", n);
 			// Same community, don't check here
@@ -249,6 +307,7 @@ public class NodeManager {
 			changeCommunity(selectedNode, best);
 //			LOG.info("Modularity = {}", getModularity().resultOfModularity(getCommunities()));
 			edited = true;
+			secondEdited = true;
 		}
 	}
 
@@ -258,8 +317,8 @@ public class NodeManager {
 	 */
 	public void breading() {
 		tempCommunities = new HashMap<Integer, Community>(communities);
-		for (Node node : selectedNode.getNeighbors()) {
-			node.getCommunity().addNode(selectedNode);
+		for (Node n : selectedNode.getNeighbors()) {
+			n.getCommunity().addNode(selectedNode);
 		}
 	}
 
@@ -270,8 +329,8 @@ public class NodeManager {
 	 */
 	public List<Integer> mutation() {
 		List<Integer> tabOfIdCommunities = new ArrayList<Integer>();
-		for (Node node : selectedNode.getNeighbors()) {
-			tabOfIdCommunities.add(node.getCommunity().getId());
+		for (Node n : selectedNode.getNeighbors()) {
+			tabOfIdCommunities.add(n.getCommunity().getId());
 		}
 		return tabOfIdCommunities;
 	}
@@ -313,6 +372,7 @@ public class NodeManager {
 			evaluation();
 			selectedNode.setFakeId(selectedNode.getFakeId() + 1);
 			edited = true;
+			secondEdited = true;
 		}
 
 	}
@@ -373,5 +433,9 @@ public class NodeManager {
 
 	public Community getCommunity(int id) {
 		return communities.get(id);
+	}
+
+	public int getRetry() {
+		return retry;
 	}
 }

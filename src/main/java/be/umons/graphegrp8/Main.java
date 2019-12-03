@@ -8,6 +8,7 @@ import org.slf4j.LoggerFactory;
 import be.umons.graphegrp8.file.ReadFile;
 import be.umons.graphegrp8.node.Community;
 import be.umons.graphegrp8.node.Node;
+import be.umons.graphegrp8.node.NodeGroup;
 import be.umons.graphegrp8.node.NodeManager;
 
 public class Main {
@@ -20,13 +21,12 @@ public class Main {
 		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
 		// ReadOtherFile rf = new ReadOtherFile();
 		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
-		int count = 1000;
+		int count = 10000;
 		double bestModularity = -1;
 
 		NodeManager nm = new NodeManager(rf);
-		nm.load();
 		Thread t = new Thread(() -> {
-			while(!Thread.interrupted()) {
+			while (!Thread.interrupted()) {
 				try {
 					Thread.sleep(1000);
 				} catch (InterruptedException ex) {
@@ -38,9 +38,8 @@ public class Main {
 		});
 		t.start();
 		for (; i < count; i++) {
-//			LOG.info("Test {}", i);
+			nm.load();
 			long before = System.currentTimeMillis();
-			nm.loadCommunities();
 			nm.start();
 			long after = System.currentTimeMillis();
 			double modularity = nm.getModularity().resultOfModularity(nm.getCommunities());
@@ -52,13 +51,18 @@ public class Main {
 				for (Community c : nm.getCommunities()) {
 					StringBuilder sb = new StringBuilder("{");
 					for (Node n : c.getNodes())
-						sb.append(n.getId()).append(", ");
+						if (n instanceof NodeGroup)
+							for (Node n2 : ((NodeGroup) n).getNodes())
+								sb.append(n2.getId()).append(", ");
+						else
+							sb.append(n.getId()).append(", ");
 					// Remove last ", "
 					sb.setLength(sb.length() - 2);
 					sb.append("}");
 					LOG.info(" - {}: {}", c.getId(), sb.toString());
 				}
-				LOG.info("Test {}: Got {}, Done in {} ms", (i + 1), modularity, (after - before));
+				LOG.info("Test {}: Got {} with {} ameliorations, Done in {} ms", (i + 1), modularity, nm.getRetry(),
+						(after - before));
 			}
 		}
 		LOG.info("Stopped");
@@ -113,14 +117,129 @@ public class Main {
 		 * System.out.printf("%.2f ", e); System.out.println(); }
 		 */
 //		Community p1 = new Community(1);
-//		p1.addNode(new Node(1));
-//		p1.addNode(new Node(2));
-//		p1.addNode(new Node(3));
+//		p1.addNode(new Node(72));
+//		p1.addNode(new Node(13));
+//		p1.addNode(new Node(15));
+//		p1.addNode(new Node(80));
+//		p1.addNode(new Node(81));
+//		p1.addNode(new Node(19));
+//		p1.addNode(new Node(83));
+//		p1.addNode(new Node(20));
+//		p1.addNode(new Node(86));
+//		p1.addNode(new Node(27));
+//		p1.addNode(new Node(30));
+//		p1.addNode(new Node(95));
+//		p1.addNode(new Node(31));
+//		p1.addNode(new Node(32));
+//		p1.addNode(new Node(35));
+//		p1.addNode(new Node(100));
+//		p1.addNode(new Node(36));
+//		p1.addNode(new Node(37));
+//		p1.addNode(new Node(102));
+//		p1.addNode(new Node(39));
+//		p1.addNode(new Node(43));
+//		p1.addNode(new Node(44));
+//		p1.addNode(new Node(55));
+//		p1.addNode(new Node(56));
+//		p1.addNode(new Node(62));
 //		Community p2 = new Community(2);
-//		p2.addNode(new Node(4));
-//		p2.addNode(new Node(5));
-//		p2.addNode(new Node(6));
-//		System.out.printf("P=[P1={1,2,3},P2={4,5,6}\nM(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2)));
+//		p2.addNode(new Node(48));
+//		p2.addNode(new Node(16));
+//		p2.addNode(new Node(65));
+//		p2.addNode(new Node(33));
+//		p2.addNode(new Node(3));
+//		p2.addNode(new Node(101));
+//		p2.addNode(new Node(7));
+//		p2.addNode(new Node(40));
+//		p2.addNode(new Node(107));
+//		p2.addNode(new Node(61));
+//		p2.addNode(new Node(14));
+//		Community p3 = new Community(3);
+//		p3.addNode(new Node(50));
+//		p3.addNode(new Node(115));
+//		p3.addNode(new Node(84));
+//		p3.addNode(new Node(68));
+//		p3.addNode(new Node(54));
+//		p3.addNode(new Node(89));
+//		p3.addNode(new Node(74));
+//		p3.addNode(new Node(59));
+//		p3.addNode(new Node(111));
+//		p3.addNode(new Node(47));
+//		Community p4 = new Community(4);
+//		p4.addNode(new Node(1));
+//		p4.addNode(new Node(69));
+//		p4.addNode(new Node(5));
+//		p4.addNode(new Node(70));
+//		p4.addNode(new Node(8));
+//		p4.addNode(new Node(9));
+//		p4.addNode(new Node(10));
+//		p4.addNode(new Node(12));
+//		p4.addNode(new Node(78));
+//		p4.addNode(new Node(79));
+//		p4.addNode(new Node(17));
+//		p4.addNode(new Node(22));
+//		p4.addNode(new Node(23));
+//		p4.addNode(new Node(24));
+//		p4.addNode(new Node(25));
+//		p4.addNode(new Node(91));
+//		p4.addNode(new Node(29));
+//		p4.addNode(new Node(94));
+//		p4.addNode(new Node(105));
+//		p4.addNode(new Node(42));
+//		p4.addNode(new Node(109));
+//		p4.addNode(new Node(112));
+//		p4.addNode(new Node(51));
+//		p4.addNode(new Node(52));
+//		Community p5 = new Community(5);
+//		p5.addNode(new Node(67));
+//		p5.addNode(new Node(4));
+//		p5.addNode(new Node(6));
+//		p5.addNode(new Node(73));
+//		p5.addNode(new Node(11));
+//		p5.addNode(new Node(75));
+//		p5.addNode(new Node(76));
+//		p5.addNode(new Node(82));
+//		p5.addNode(new Node(85));
+//		p5.addNode(new Node(87));
+//		p5.addNode(new Node(92));
+//		p5.addNode(new Node(93));
+//		p5.addNode(new Node(98));
+//		p5.addNode(new Node(99));
+//		p5.addNode(new Node(103));
+//		p5.addNode(new Node(41));
+//		p5.addNode(new Node(108));
+//		p5.addNode(new Node(45));
+//		p5.addNode(new Node(49));
+//		p5.addNode(new Node(113));
+//		p5.addNode(new Node(53));
+//		p5.addNode(new Node(58));
+//		Community p6 = new Community(6);
+//		p6.addNode(new Node(2));
+//		p6.addNode(new Node(18));
+//		p6.addNode(new Node(21));
+//		p6.addNode(new Node(26));
+//		p6.addNode(new Node(28));
+//		p6.addNode(new Node(34));
+//		p6.addNode(new Node(38));
+//		p6.addNode(new Node(46));
+//		p6.addNode(new Node(57));
+//		p6.addNode(new Node(60));
+//		p6.addNode(new Node(63));
+//		p6.addNode(new Node(64));
+//		p6.addNode(new Node(66));
+//		p6.addNode(new Node(71));
+//		p6.addNode(new Node(77));
+//		p6.addNode(new Node(88));
+//		p6.addNode(new Node(90));
+//		p6.addNode(new Node(96));
+//		p6.addNode(new Node(97));
+//		p6.addNode(new Node(104));
+//		p6.addNode(new Node(106));
+//		p6.addNode(new Node(110));
+//		p6.addNode(new Node(114));
+//		LOG.info("M(P) = {}", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2, p3, p4, p6, p5)));
+		// 0.5783420133113694
+//		System.out.printf("M(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2, p3, p4, p5, p6)));
 	}
 
 	public static void main(String[] args) {

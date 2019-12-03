@@ -1,7 +1,7 @@
 package be.umons.graphegrp8.node;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 public class Node {
 	/**
@@ -13,9 +13,10 @@ public class Node {
 	 */
 	private int fakeId;
 	/**
-	 * A list of neighboring nodes
+	 * A set of neighboring nodes. We use Set and not List to prevent adding same
+	 * node
 	 */
-	private List<Node> neighbors;
+	private Set<Node> neighbors;
 	/**
 	 * The community where is this node
 	 */
@@ -24,13 +25,13 @@ public class Node {
 	public Node(int id) {
 		this.id = id;
 		this.fakeId = id;
-		this.neighbors = new ArrayList<>();
+		this.neighbors = new HashSet<>();
 	}
 
 	public int getId() {
 		return id;
 	}
-	
+
 	public int getFakeId() {
 		return fakeId;
 	}
@@ -39,7 +40,7 @@ public class Node {
 		this.fakeId = fakeId;
 	}
 
-	public List<Node> getNeighbors() {
+	public Set<Node> getNeighbors() {
 		return neighbors;
 	}
 
@@ -48,8 +49,13 @@ public class Node {
 	 * 
 	 * @param n The node that is linked to this node
 	 */
-	public void addNeighbors(Node n) {
-		neighbors.add(n);
+	public void addNeighbors(Node node) {
+		addNeighbors(node, 1);
+	}
+
+	public void addNeighbors(Node node, int cost) {
+//		neighbors.add(new NodeCost(node, cost));
+		neighbors.add(node);
 	}
 
 	public Community getCommunity() {

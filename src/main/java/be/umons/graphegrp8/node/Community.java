@@ -4,10 +4,11 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class Community {
 	private int id;
-	private HashMap<Integer, Node> nodes;
+	private Map<Integer, Node> nodes;
 	private double communityCost;
 
 	public Community(int id) {
@@ -48,13 +49,21 @@ public class Community {
 	public Collection<Node> getNodes() {
 		return nodes.values();
 	}
-	
-	public List<Integer> getArrayOfNodes(){
+
+	public List<Integer> getArrayOfNodes() {
 		List<Integer> nodesList = new ArrayList<Integer>();
-		for (Node nod : nodes.values()) {
-			nodesList.add(nod.getId());
+		for (Node node : nodes.values()) {
+			if (node instanceof NodeGroup)
+				for (Node n : ((NodeGroup) node).getNodes())
+					nodesList.add(n.getId());
+			else
+				nodesList.add(node.getId());
 		}
 		return nodesList;
+	}
+
+	public void clear() {
+		nodes.clear();
 	}
 
 	public int getId() {
