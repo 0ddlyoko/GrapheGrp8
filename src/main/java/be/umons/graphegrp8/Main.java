@@ -18,16 +18,16 @@ public class Main {
 	private int i = 0;
 
 	public Main() {
-//		ReadOtherFile rf = new ReadOtherFile();
-		ReadFile rf = new ReadFile();
+		ReadOtherFile rf = new ReadOtherFile();
+//		ReadFile rf = new ReadFile();
 		LOG.info("Parsing file ...");
 		long before = System.currentTimeMillis();
-		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
-//		rf.parse(new File("src/main/resources/graphs/files/others/Test.txt"));
+//		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
+		rf.parse(new File("src/main/resources/graphs/files/others/TheInternet.txt"));
 		LOG.info("Done in {} ms", (System.currentTimeMillis() - before));
 		// ReadOtherFile rf = new ReadOtherFile();
 		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
-		int count = 10000;
+		int count = 10;
 		double bestModularity = -1;
 
 		NodeManager nm = new NodeManager(rf);
@@ -123,127 +123,46 @@ public class Main {
 		 * System.out.printf("%.2f ", e); System.out.println(); }
 		 */
 //		Community p1 = new Community(1);
-//		p1.addNode(new Node(72));
-//		p1.addNode(new Node(13));
-//		p1.addNode(new Node(15));
-//		p1.addNode(new Node(80));
-//		p1.addNode(new Node(81));
-//		p1.addNode(new Node(19));
-//		p1.addNode(new Node(83));
-//		p1.addNode(new Node(20));
-//		p1.addNode(new Node(86));
-//		p1.addNode(new Node(27));
-//		p1.addNode(new Node(30));
-//		p1.addNode(new Node(95));
-//		p1.addNode(new Node(31));
-//		p1.addNode(new Node(32));
-//		p1.addNode(new Node(35));
-//		p1.addNode(new Node(100));
-//		p1.addNode(new Node(36));
-//		p1.addNode(new Node(37));
-//		p1.addNode(new Node(102));
-//		p1.addNode(new Node(39));
-//		p1.addNode(new Node(43));
-//		p1.addNode(new Node(44));
-//		p1.addNode(new Node(55));
-//		p1.addNode(new Node(56));
-//		p1.addNode(new Node(62));
+//		Arrays.asList(48, 16, 33, 65, 3, 101, 7, 40, 107, 61, 14).forEach(nb -> {
+//			p1.addNode(new Node(nb));
+//		});
 //		Community p2 = new Community(2);
-//		p2.addNode(new Node(48));
-//		p2.addNode(new Node(16));
-//		p2.addNode(new Node(65));
-//		p2.addNode(new Node(33));
-//		p2.addNode(new Node(3));
-//		p2.addNode(new Node(101));
-//		p2.addNode(new Node(7));
-//		p2.addNode(new Node(40));
-//		p2.addNode(new Node(107));
-//		p2.addNode(new Node(61));
-//		p2.addNode(new Node(14));
+//		Arrays.asList(34, 2, 38, 104, 106, 90, 26, 46, 110).forEach(nb -> {
+//			p2.addNode(new Node(nb));
+//		});
 //		Community p3 = new Community(3);
-//		p3.addNode(new Node(50));
-//		p3.addNode(new Node(115));
-//		p3.addNode(new Node(84));
-//		p3.addNode(new Node(68));
-//		p3.addNode(new Node(54));
-//		p3.addNode(new Node(89));
-//		p3.addNode(new Node(74));
-//		p3.addNode(new Node(59));
-//		p3.addNode(new Node(111));
-//		p3.addNode(new Node(47));
+//		Arrays.asList(50, 115, 84, 68, 54, 89, 74, 47, 111).forEach(nb -> {
+//			p3.addNode(new Node(nb));
+//		});
 //		Community p4 = new Community(4);
-//		p4.addNode(new Node(1));
-//		p4.addNode(new Node(69));
-//		p4.addNode(new Node(5));
-//		p4.addNode(new Node(70));
-//		p4.addNode(new Node(8));
-//		p4.addNode(new Node(9));
-//		p4.addNode(new Node(10));
-//		p4.addNode(new Node(12));
-//		p4.addNode(new Node(78));
-//		p4.addNode(new Node(79));
-//		p4.addNode(new Node(17));
-//		p4.addNode(new Node(22));
-//		p4.addNode(new Node(23));
-//		p4.addNode(new Node(24));
-//		p4.addNode(new Node(25));
-//		p4.addNode(new Node(91));
-//		p4.addNode(new Node(29));
-//		p4.addNode(new Node(94));
-//		p4.addNode(new Node(105));
-//		p4.addNode(new Node(42));
-//		p4.addNode(new Node(109));
-//		p4.addNode(new Node(112));
-//		p4.addNode(new Node(51));
-//		p4.addNode(new Node(52));
+//		Arrays.asList(112, 52, 69, 22, 23, 8, 9, 109, 78, 79).forEach(nb -> {
+//			p4.addNode(new Node(nb));
+//		});
 //		Community p5 = new Community(5);
-//		p5.addNode(new Node(67));
-//		p5.addNode(new Node(4));
-//		p5.addNode(new Node(6));
-//		p5.addNode(new Node(73));
-//		p5.addNode(new Node(11));
-//		p5.addNode(new Node(75));
-//		p5.addNode(new Node(76));
-//		p5.addNode(new Node(82));
-//		p5.addNode(new Node(85));
-//		p5.addNode(new Node(87));
-//		p5.addNode(new Node(92));
-//		p5.addNode(new Node(93));
-//		p5.addNode(new Node(98));
-//		p5.addNode(new Node(99));
-//		p5.addNode(new Node(103));
-//		p5.addNode(new Node(41));
-//		p5.addNode(new Node(108));
-//		p5.addNode(new Node(45));
-//		p5.addNode(new Node(49));
-//		p5.addNode(new Node(113));
-//		p5.addNode(new Node(53));
-//		p5.addNode(new Node(58));
+//		Arrays.asList(113, 49, 67, 87, 58, 76, 92, 93, 45).forEach(nb -> {
+//			p5.addNode(new Node(nb));
+//		});
 //		Community p6 = new Community(6);
-//		p6.addNode(new Node(2));
-//		p6.addNode(new Node(18));
-//		p6.addNode(new Node(21));
-//		p6.addNode(new Node(26));
-//		p6.addNode(new Node(28));
-//		p6.addNode(new Node(34));
-//		p6.addNode(new Node(38));
-//		p6.addNode(new Node(46));
-//		p6.addNode(new Node(57));
-//		p6.addNode(new Node(60));
-//		p6.addNode(new Node(63));
-//		p6.addNode(new Node(64));
-//		p6.addNode(new Node(66));
-//		p6.addNode(new Node(71));
-//		p6.addNode(new Node(77));
-//		p6.addNode(new Node(88));
-//		p6.addNode(new Node(90));
-//		p6.addNode(new Node(96));
-//		p6.addNode(new Node(97));
-//		p6.addNode(new Node(104));
-//		p6.addNode(new Node(106));
-//		p6.addNode(new Node(110));
-//		p6.addNode(new Node(114));
-//		LOG.info("M(P) = {}", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2, p3, p4, p6, p5)));
+//		Arrays.asList(1, 5, 70, 105, 42, 10, 12, 17, 51, 24, 25, 91, 29, 94).forEach(nb -> {
+//			p6.addNode(new Node(nb));
+//		});
+//		Community p7 = new Community(6);
+//		Arrays.asList(32, 35, 100, 37, 39, 72, 43, 44, 13, 15, 19, 86, 55, 27, 62).forEach(nb -> {
+//			p7.addNode(new Node(nb));
+//		});
+//		Community p8 = new Community(6);
+//		Arrays.asList(80, 81, 83, 20, 36, 102, 56, 30, 31, 95).forEach(nb -> {
+//			p8.addNode(new Node(nb));
+//		});
+//		Community p9 = new Community(6);
+//		Arrays.asList(82, 99, 4, 53, 85, 6, 103, 41, 73, 11, 75, 108).forEach(nb -> {
+//			p9.addNode(new Node(nb));
+//		});
+//		Community p10 = new Community(6);
+//		Arrays.asList(96, 64, 97, 66, 98, 71, 77, 114, 18, 21, 88, 57, 59, 28, 60, 63).forEach(nb -> {
+//			p10.addNode(new Node(nb));
+//		});
+//		LOG.info("M(P) = {}", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2, p3, p4, p5, p6, p7, p8, p9, p10)));
 		// 0.5783420133113694
 //		System.out.printf("M(P) =%.3f ", nm.getModularity().resultOfModularity(Arrays.asList(p1, p2, p3, p4, p5, p6)));
 	}

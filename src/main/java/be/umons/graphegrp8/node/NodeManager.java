@@ -31,6 +31,7 @@ public class NodeManager {
 
 	public NodeManager(FileParser fileParser) {
 		this.fileParser = fileParser;
+		modularity = new Modularity(fileParser);
 	}
 
 	/**
@@ -39,7 +40,6 @@ public class NodeManager {
 	public void load() {
 //		LOG.info("Loading NodeManager");
 		// Create the Modularity
-		modularity = new Modularity(fileParser);
 		loadNodes();
 		loadEdges();
 		loadCommunities();
@@ -165,7 +165,7 @@ public class NodeManager {
 				// Selecting a node
 				selection();
 				if (selectedNode.getFakeId() % 100 == 0) {
-//					LOG.info("Selected {}, number of communities = {}", selectedNode.getFakeId(), communities.size());
+					LOG.info("Selected {}, number of communities = {}", selectedNode.getFakeId(), communities.size());
 				}
 				changeCommunityIfNeeds();
 //			breading();
@@ -177,7 +177,6 @@ public class NodeManager {
 //			LOG.info("hello comm {}", edited);
 			} while (!doWeStopNow());
 
-//			LOG.info("# of communities = {}, communities: ", getCommunities().size());
 //			for (Community c : getCommunities()) {
 //				StringBuilder sb = new StringBuilder("{");
 //				for (Node n : c.getNodes())
@@ -311,8 +310,8 @@ public class NodeManager {
 //		long start = System.currentTimeMillis();
 		Community current = selectedNode.getCommunity();
 		double currentModularity = current.getCommunityCost();
-		double modularityWithoutSelected = modularity.resultOfModularity(selectedNode.getCommunity(),
-				selectedNode, false);
+		double modularityWithoutSelected = modularity.resultOfModularity(selectedNode.getCommunity(), selectedNode,
+				false);
 //		LOG.info("currentModularity = {}, modularityWithoutSelected = {}", currentModularity,
 //				modularityWithoutSelected);
 		Community best = null;
