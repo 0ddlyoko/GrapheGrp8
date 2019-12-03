@@ -18,12 +18,12 @@ public class Main {
 	private int i = 0;
 
 	public Main() {
-		ReadOtherFile rf = new ReadOtherFile();
-//		ReadFile rf = new ReadFile();
+//		ReadOtherFile rf = new ReadOtherFile();
+		ReadFile rf = new ReadFile();
 		LOG.info("Parsing file ...");
 		long before = System.currentTimeMillis();
-//		rf.parse(new File("src/main/resources/graphs/files/File2.txt"));
-		rf.parse(new File("src/main/resources/graphs/files/others/Test.txt"));
+		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
+//		rf.parse(new File("src/main/resources/graphs/files/others/Test.txt"));
 		LOG.info("Done in {} ms", (System.currentTimeMillis() - before));
 		// ReadOtherFile rf = new ReadOtherFile();
 		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));

@@ -124,17 +124,17 @@ public class NodeManager {
 		// Calculate communityCost
 		if (oldCommunity != null) {
 //			LOG.info("{} : {} : {}", oldCommunity.size(), modularity.resultOfModularity(oldCommunity), modularity.resultOfModularity(oldCommunity, node.getId(), false));
-//			if (oldCommunity.size() == 0)
-//				oldCommunity.setCommunityCost(0);
-//			else if (oldCommunity.size() == 1)
+			if (oldCommunity.size() == 0)
+				oldCommunity.setCommunityCost(0);
+			else if (oldCommunity.size() == 1)
 				oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity));
-//			else
-//				oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity, node.getId(), false));
+			else
+				oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity, node, false));
 		}
 //		LOG.info("{} : {} : {}", community.size(), modularity.resultOfModularity(community), modularity.resultOfModularity(community, node.getId(), true));
-//		if (community.size() == 0)
-//			community.setCommunityCost(0);
-//		else if (community.size() == 1)
+		if (community.size() == 0)
+			community.setCommunityCost(0);
+		else if (community.size() == 1)
 			community.setCommunityCost(modularity.resultOfModularity(community));
 //		else
 //			community.setCommunityCost(modularity.resultOfModularity(community, node.getId(), true));
@@ -151,7 +151,7 @@ public class NodeManager {
 	public void start() {
 		boolean stop = false;
 		retry = 0;
-//		do {
+		do {
 //			LOG.info("retry = {}", retry);
 			secondEdited = false;
 //			LOG.info("Initialization");
@@ -191,57 +191,55 @@ public class NodeManager {
 //				sb.append("}");
 //				LOG.info(" - {}: {}", c.getId(), sb.toString());
 //			}
-			
-			
-			
-//			// Reduce nodes in same community
-//			// Make a copy of communities
-//			this.nodes = new Node[communities.size()];
-//			this.fakeIdNodes = new Node[communities.size()];
-//			// Create groups of nodes
-//			int i = 0;
-//			for (Community c : communities.values()) {
-//				// Retrieving all nodes from communities
-//				List<Node> nodes = new ArrayList<Node>();
-//				for (Node node : c.getNodes()) {
-//					if (node instanceof NodeGroup)
-//						for (Node n : ((NodeGroup) node).getNodes()) {
-//							// Save the current community of the node
-//							n.setCommunity(c);
-//							nodes.add(n);
-//						}
-//					else
-//						nodes.add(node);
-//				}
-//				this.fakeIdNodes[i] = this.nodes[i] = new NodeGroup(i + 1, nodes);
-//				// Reuse old community
-//				c.clear();
-//				changeCommunity(this.nodes[i], c);
-//				i++;
-//			}
-//			// Neighbors
-//			for (Community c : communities.values()) {
-//				for (Node n : c.getNodes()) {
-//					// Here we know that n is NodeGroup
-//					NodeGroup ng = (NodeGroup) n;
-//					for (Node n2 : ng.getNodes()) {
-//						// Check neighbors
-//						for (Node neighbor : n2.getNeighbors()) {
-//							// Different community, add neighbor
-//							if (neighbor.getCommunity().getId() != n2.getCommunity().getId()) {
-//								// Community of n2 has always one element
-//								Node other = neighbor.getCommunity().getNodes().iterator().next();
-//								n.addNeighbors(other);
-//								other.addNeighbors(n);
-//							}
-//						}
-//					}
-//				}
-//			}
-//			retry++;
-//			// Reset selectedNode
-//			selectedNode = null;
-//		} while (secondEdited);
+
+			// Reduce nodes in same community
+			// Make a copy of communities
+			this.nodes = new Node[communities.size()];
+			this.fakeIdNodes = new Node[communities.size()];
+			// Create groups of nodes
+			int i = 0;
+			for (Community c : communities.values()) {
+				// Retrieving all nodes from communities
+				List<Node> nodes = new ArrayList<Node>();
+				for (Node node : c.getNodes()) {
+					if (node instanceof NodeGroup)
+						for (Node n : ((NodeGroup) node).getNodes()) {
+							// Save the current community of the node
+							n.setCommunity(c);
+							nodes.add(n);
+						}
+					else
+						nodes.add(node);
+				}
+				this.fakeIdNodes[i] = this.nodes[i] = new NodeGroup(i + 1, nodes);
+				// Reuse old community
+				c.clear();
+				changeCommunity(this.nodes[i], c);
+				i++;
+			}
+			// Neighbors
+			for (Community c : communities.values()) {
+				for (Node n : c.getNodes()) {
+					// Here we know that n is NodeGroup
+					NodeGroup ng = (NodeGroup) n;
+					for (Node n2 : ng.getNodes()) {
+						// Check neighbors
+						for (Node neighbor : n2.getNeighbors()) {
+							// Different community, add neighbor
+							if (neighbor.getCommunity().getId() != n2.getCommunity().getId()) {
+								// Community of n2 has always one element
+								Node other = neighbor.getCommunity().getNodes().iterator().next();
+								n.addNeighbors(other);
+								other.addNeighbors(n);
+							}
+						}
+					}
+				}
+			}
+			retry++;
+			// Reset selectedNode
+			selectedNode = null;
+		} while (secondEdited);
 
 //		} while (false);
 		if (stop)
@@ -313,7 +311,10 @@ public class NodeManager {
 //		long start = System.currentTimeMillis();
 		Community current = selectedNode.getCommunity();
 		double currentModularity = current.getCommunityCost();
-		double modularityWithoutSelected = modularity.resultOfModularity(selectedNode.getCommunity(), selectedNode.getId(), false);
+		double modularityWithoutSelected = modularity.resultOfModularity(selectedNode.getCommunity(),
+				selectedNode, false);
+//		LOG.info("currentModularity = {}, modularityWithoutSelected = {}", currentModularity,
+//				modularityWithoutSelected);
 		Community best = null;
 		double bestCost = -1;
 
@@ -327,7 +328,8 @@ public class NodeManager {
 			// The current cost
 //			long start2 = System.currentTimeMillis();
 			double oldCost = n.getCommunity().getCommunityCost() + currentModularity;
-			double newCost = modularity.resultOfModularity(n.getCommunity(), selectedNode.getId(), true) + modularityWithoutSelected;
+			double newCost = modularity.resultOfModularity(n.getCommunity(), selectedNode, true)
+					+ modularityWithoutSelected;
 			// Change community
 //			changeCommunity(selectedNode, n.getCommunity(), false);
 			// Calculate new cost

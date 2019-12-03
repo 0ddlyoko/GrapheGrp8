@@ -122,23 +122,26 @@ public class Modularity {
 		double[][] matrixProbTemp = verticeToMatrixProb(vertice);
 //		for (int i : vertice)
 //			LOG.info("A: {}", i);
-		for (int i = 0; i < vertice.size(); i++) {
-			for (int j = 0; j < vertice.size(); j++) {
-//				LOG.info("A: {} - {} : {} - {}", i, j, matrixAdjTemp[i][j], matrixProbTemp[i][j]);
-				result += matrixAdjTemp[i][j] - matrixProbTemp[i][j];
-			}
-		}
-//		for (Node n : community.getNodes())
-//			if (n instanceof NodeGroup)
-//				for (Node n2 : ((NodeGroup) n).getNodes())
-//					for (Node n3 : ((NodeGroup) n).getNodes())
-////						LOG.info("B: {} - {} : {} - {}", n2.getId() - 1, n3.getId() - 1,
-////								matrixAdj[n2.getId() - 1][n3.getId() - 1], matrixProb[n2.getId() - 1][n3.getId() - 1]);
-//						result += matrixAdj[n2.getId() - 1][n3.getId() - 1]
-//								- matrixProb[n2.getId() - 1][n3.getId() - 1];
-//			else
-//				for (Node n2 : community.getNodes())
-//					result += matrixAdj[n.getId() - 1][n2.getId() - 1] - matrixProb[n.getId() - 1][n2.getId() - 1];
+
+//		for (int i = 0; i < vertice.size(); i++) {
+//			for (int j = 0; j < vertice.size(); j++) {
+////				LOG.info("A: {} - {} : {} - {}", i, j, matrixAdjTemp[i][j], matrixProbTemp[i][j]);
+//				result += matrixAdjTemp[i][j] - matrixProbTemp[i][j];
+//			}
+//		}
+
+		for (Node n : community.getNodes())
+			if (n instanceof NodeGroup)
+				for (Node n2 : ((NodeGroup) n).getNodes())
+					for (Node n3 : ((NodeGroup) n).getNodes())
+//						LOG.info("B: {} - {} : {} - {}", n2.getId() - 1, n3.getId() - 1,
+//								matrixAdj[n2.getId() - 1][n3.getId() - 1], matrixProb[n2.getId() - 1][n3.getId() - 1]);
+						result += matrixAdj[n2.getId() - 1][n3.getId() - 1]
+								- matrixProb[n2.getId() - 1][n3.getId() - 1];
+			else
+				for (Node n2 : community.getNodes())
+					result += matrixAdj[n.getId() - 1][n2.getId() - 1] - matrixProb[n.getId() - 1][n2.getId() - 1];
+
 //		System.exit(0);
 
 //		long after = System.currentTimeMillis();
@@ -147,21 +150,39 @@ public class Modularity {
 	}
 
 	/**
+	 * Return the modularity of community by adding / removing specific id
 	 * 
-	 * 
-	 * @param c   The community
-	 * @param id  The id of the node
-	 * @param add If true, add the modularity of id to the current modularity
+	 * @param c    The community
+	 * @param node The node
+	 * @param add  If true, add the modularity of id to the current modularity
 	 * @return The new modularity
 	 */
-	public double resultOfModularity(Community c, int id, boolean add) {
+	public double resultOfModularity(Community c, Node node, boolean add) {
+		int id = node.getId();
 		double result = c.getCommunityCost() * (2 * nbEdges);
 		double diff = 0;
 //		LOG.info("result = {}", result);
-		for (Node n : c.getNodes())
-			if (n.getId() != id)
-				diff += ((matrixAdj[id - 1][n.getId() - 1] - matrixProb[id - 1][n.getId() - 1]) * 2);
-		diff += (matrixAdj[id - 1][id - 1] - matrixProb[id - 1][id - 1]);
+		if (node instanceof NodeGroup) {
+			// NodeGroup
+			// Add every node
+			for (Node n : ((NodeGroup) node).getNodes()) { // Loop over each nodes to add
+				for (Node n2 : c.getNodes()) { // Loop over each nodes that is in community
+					for (Node n3 : ((NodeGroup) n2).getNodes()) { // Same up
+						diff += ((matrixAdj[n.getId() - 1][n3.getId() - 1] - matrixProb[n.getId() - 1][n3.getId() - 1])
+								* 2);
+					}
+				}
+				// The square
+				for (Node n2 : ((NodeGroup) node).getNodes()) {
+					diff += (matrixAdj[n.getId() - 1][n2.getId() - 1] - matrixProb[n.getId() - 1][n2.getId() - 1]);
+				}
+			}
+		} else {
+			for (Node n : c.getNodes())
+				if (n.getId() != id)
+					diff += ((matrixAdj[id - 1][n.getId() - 1] - matrixProb[id - 1][n.getId() - 1]) * 2);
+			diff += (matrixAdj[id - 1][id - 1] - matrixProb[id - 1][id - 1]);
+		}
 //		LOG.info("diff = {}", diff);
 		if (add)
 			result += diff;
