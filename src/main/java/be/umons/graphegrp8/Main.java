@@ -1,6 +1,9 @@
 package be.umons.graphegrp8;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,12 +21,12 @@ public class Main {
 	private int i = 0;
 
 	public Main() {
-		ReadOtherFile rf = new ReadOtherFile();
+		ReadFile rf = new ReadFile();
 //		ReadFile rf = new ReadFile();
 		LOG.info("Parsing file ...");
 		long before = System.currentTimeMillis();
-//		rf.parse(new File("src/main/resources/graphs/files/File5.txt"));
-		rf.parse(new File("src/main/resources/graphs/files/others/TheInternet.txt"));
+		rf.parse(new File("src/main/resources/graphs/files/File2.txt"));
+//		rf.parse(new File("src/main/resources/graphs/files/others/TheInternet.txt"));
 		LOG.info("Done in {} ms", (System.currentTimeMillis() - before));
 		// ReadOtherFile rf = new ReadOtherFile();
 		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
@@ -71,6 +74,61 @@ public class Main {
 						(after - before));
 			}
 		}
+		LOG.info("TEST SORTIE OUTPUT DEMANDEE");
+		
+		LOG.info("{}",bestModularity);
+		LOG.info("{}",nm.getCommunities().size());
+		for(Community c : nm.getCommunities()) {
+			StringBuilder sb2 = new StringBuilder();
+			int countVertige = 0;
+			for(Node n : c.getNodes()) {
+				if(n instanceof NodeGroup) {
+					for(Node n2 : ((NodeGroup) n).getNodes()) {
+						countVertige++;
+						sb2.append(n2.getId()).append(" ");
+					}
+				}
+				else { 
+					countVertige++;
+					sb2.append(n.getId()).append(" ");
+				}
+			}
+			LOG.info("{}",countVertige);
+			LOG.info("{}", sb2.toString());
+		}
+		
+		try {
+			BufferedWriter fileOut = new BufferedWriter(new FileWriter ("src/main/resources/graphs/files/ResultFile.txt"));
+			fileOut.write("" + bestModularity);
+			fileOut.newLine();
+			fileOut.write("" + nm.getCommunities().size());
+			fileOut.newLine();
+			for(Community c : nm.getCommunities()) {
+				StringBuilder sb = new StringBuilder();
+				int countVertige = 0;
+				for(Node n : c.getNodes()) {
+					if(n instanceof NodeGroup) {
+						for(Node n2 : ((NodeGroup) n).getNodes()) {
+							countVertige++;
+							sb.append(n2.getId()).append(" ");
+						}
+					}
+					else { 
+						countVertige++;
+						sb.append(n.getId()).append(" ");
+					}
+				}
+				fileOut.write("" + countVertige);
+				fileOut.newLine();
+				fileOut.write(sb.toString());
+				fileOut.newLine();
+			}	
+			LOG.info("FICHIER RESULTAT FAIT");
+			fileOut.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		
 		LOG.info("Stopped");
 		t.interrupt();
 
