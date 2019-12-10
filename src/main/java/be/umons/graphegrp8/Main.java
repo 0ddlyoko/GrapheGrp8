@@ -1,75 +1,195 @@
 package be.umons.graphegrp8;
 
-import java.util.ArrayList;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import be.umons.graphegrp8.file.FileParser;
+import be.umons.graphegrp8.file.ReadFile;
+import be.umons.graphegrp8.file.ReadOtherFile;
+import be.umons.graphegrp8.node.Community;
+import be.umons.graphegrp8.node.Node;
+import be.umons.graphegrp8.node.NodeGroup;
+import be.umons.graphegrp8.node.NodeManager;
+
+/**
+ * MIT License
+ * 
+ * Copyright (c) 2019 GrapheGrp8
+ * 
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ * 
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ * 
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ */
 public class Main {
-	
-	public static void test() {
-		
-		
-		
-		ReadFile rf = new ReadFile("Files/File1.txt");
-		Modularity mod = new Modularity(rf);
-		
-		
-		System.out.println(rf.getNbEdges());
-		System.out.println(rf.getNbVertices());
-		
-		for(Integer elt: rf.getHeadTab()) {
-			System.out.print(elt+" ");
+	private final Logger LOG = LoggerFactory.getLogger(getClass());
+
+	private int i = 0;
+
+	public Main(String[] args) {
+		if (args.length <= 1) {
+			LOG.error("Syntax: java -jar <jarName> <input> <count> <output> [other]");
+			System.exit(0);
 		}
-		System.out.println("\n");
-		for(Integer elt: rf.getSuccTab()) {
-			System.out.print(elt+" ");
+		String strInput = args[0];
+		Integer count = 0;
+		try {
+			count = Integer.parseInt(args[1]);
+		} catch (NumberFormatException ex) {
+			LOG.error("Please enter a correct number");
+			System.exit(0);
 		}
-		System.out.println("\n Table de dégré");
-		for(Integer elt: rf.buildTabDegree()) {
-			System.out.print(elt+" ");
+		String strOutput = args[2];
+		File output = new File(strOutput);
+		if (output.isDirectory()) {
+			LOG.error("Output is a directory !");
+			System.exit(0);
 		}
-		
-		System.out.println("\n Matrice adjacente initiale");
-		for(int[] elt: mod.getMatrixAdj()) {
-			for(Integer e : elt) {
-				System.out.print(e+" ");
+		if (!output.exists()) {
+			try {
+				if (!output.createNewFile()) {
+					LOG.error("Cannot create output file !");
+					System.exit(0);
+				}
+			} catch (IOException ex) {
+				LOG.error("Cannot create output file !", ex);
+				System.exit(0);
 			}
-			System.out.println(" ");
 		}
-		
-		System.out.println("\n Matrice de probabilité initiale");
-		for(double[] elt: mod.getMatrixProb()) {
-			for(double e : elt) {
-				System.out.printf("%.2f ",e);
+		FileParser fp = (args.length == 4 && "other".equalsIgnoreCase(args[3])) ? new ReadOtherFile() : new ReadFile();
+
+		LOG.info("");
+		LOG.info("Projet de Graphe développé par Giacomello Nathan, Coyez François et Kamta Boris");
+		LOG.info("Implémentation de l'algorithme de Louvain");
+		LOG.info("");
+
+		LOG.info("Parsing file ...");
+		long before = System.currentTimeMillis();
+		fp.parse(new File(strInput));
+		LOG.info("Done in {} ms", (System.currentTimeMillis() - before));
+		// ReadOtherFile rf = new ReadOtherFile();
+		// rf.parse(new File("src/main/resources/graphs/files/others/File0.txt"));
+		double bestModularity = -1;
+
+		long total = 0;
+		NodeManager nm = new NodeManager(fp);
+		Thread t = new Thread(() -> {
+			while (!Thread.interrupted()) {
+				try {
+					Thread.sleep(1000);
+				} catch (InterruptedException ex) {
+					LOG.info("Interrupted");
+					break;
+				}
+				LOG.info("Test #{}", i);
 			}
-			System.out.println(" ");
-		}
-		
-		ArrayList<Integer> sommet= new ArrayList<Integer>();
-		sommet.add(16);
-		sommet.add(4);
-		sommet.add(15);
-		sommet.add(12);
-		sommet.sort(null);
-		
-		System.out.println("\n matrice pour les sommets selectionnés");
-		for(int[] elt: mod.verticeToMatrixAdj(sommet)) {
-			for(Integer e : elt) {
-				System.out.print(e+" ");
+		});
+		t.start();
+		for (; i < count; i++) {
+			nm.load();
+			before = System.currentTimeMillis();
+			nm.start();
+			long after = System.currentTimeMillis();
+			double modularity = nm.getModularity().resultOfModularity(nm.getCommunities());
+			total += (after - before);
+			if (modularity > bestModularity) {
+				bestModularity = modularity;
+				LOG.info("Modularity = {}, # of communities = {}, communities: ", bestModularity,
+						nm.getCommunities().size());
+				for (Community c : nm.getCommunities()) {
+					StringBuilder sb = new StringBuilder("{");
+					for (Node n : c.getNodes())
+						if (n instanceof NodeGroup)
+							for (Node n2 : ((NodeGroup) n).getNodes())
+								sb.append(n2.getId()).append(", ");
+						else
+							sb.append(n.getId()).append(", ");
+					// Remove last ", "
+					sb.setLength(sb.length() - 2);
+					sb.append("}");
+					LOG.info(" - {}: {}", c.getId(), sb.toString());
+				}
+				LOG.info("Test {}: Got {} with {} ameliorations, Done in {} ms", (i + 1), modularity, nm.getRetry(),
+						(after - before));
 			}
-			System.out.println(" ");
 		}
-		
-		System.out.println("\n");
-		for(double[] elt: mod.verticeToMatrixProb(sommet)) {
-			for(double e : elt) {
-				System.out.printf("%.2f ",e);
+		LOG.info("Moyenne: {} ms", (total / count));
+		LOG.info("TEST SORTIE OUTPUT DEMANDEE");
+
+		LOG.info("{}", bestModularity);
+		LOG.info("{}", nm.getCommunities().size());
+		for (Community c : nm.getCommunities()) {
+			StringBuilder sb2 = new StringBuilder();
+			int countVertige = 0;
+			for (Node n : c.getNodes()) {
+				if (n instanceof NodeGroup) {
+					for (Node n2 : ((NodeGroup) n).getNodes()) {
+						countVertige++;
+						sb2.append(n2.getId()).append(" ");
+					}
+				} else {
+					countVertige++;
+					sb2.append(n.getId()).append(" ");
+				}
 			}
-			System.out.println(" ");
+			LOG.info("{}", countVertige);
+			LOG.info("{}", sb2.toString());
 		}
-		
-	}
-	public static void main(String[] args) {
-		test();
-	
+
+		try {
+			BufferedWriter fileOut = new BufferedWriter(new FileWriter(output));
+			fileOut.write("" + bestModularity);
+			fileOut.newLine();
+			fileOut.write("" + nm.getCommunities().size());
+			fileOut.newLine();
+			for (Community c : nm.getCommunities()) {
+				StringBuilder sb = new StringBuilder();
+				int countVertige = 0;
+				for (Node n : c.getNodes()) {
+					if (n instanceof NodeGroup) {
+						for (Node n2 : ((NodeGroup) n).getNodes()) {
+							countVertige++;
+							sb.append(n2.getId()).append(" ");
+						}
+					} else {
+						countVertige++;
+						sb.append(n.getId()).append(" ");
+					}
+				}
+				fileOut.write("" + countVertige);
+				fileOut.newLine();
+				fileOut.write(sb.toString());
+				fileOut.newLine();
+			}
+			LOG.info("FICHIER RESULTAT FAIT");
+			fileOut.close();
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+
+		LOG.info("Stopped");
+		t.interrupt();
 	}
 
+	public static void main(String[] args) {
+		new Main(args);
+	}
 }
