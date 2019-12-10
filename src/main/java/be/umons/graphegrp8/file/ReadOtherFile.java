@@ -25,7 +25,6 @@ public class ReadOtherFile extends ReadFile {
 			nbEdges = 0;
 			nbVertices = Integer.parseInt(in.readLine().trim());
 			boolean zero = "true".equalsIgnoreCase(in.readLine().trim());
-			System.out.println(zero ? "true" : "false");
 			this.map = new SortedSet[nbVertices];
 			String line;
 			while ((line = in.readLine()) != null) {

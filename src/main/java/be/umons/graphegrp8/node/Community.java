@@ -1,9 +1,7 @@
 package be.umons.graphegrp8.node;
 
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 public class Community {
@@ -14,7 +12,6 @@ public class Community {
 	public Community(int id) {
 		this.id = id;
 		this.nodes = new HashMap<Integer, Node>();
-		this.communityCost = -1;
 	}
 
 	/**
@@ -48,18 +45,6 @@ public class Community {
 
 	public Collection<Node> getNodes() {
 		return nodes.values();
-	}
-
-	public List<Integer> getArrayOfNodes() {
-		List<Integer> nodesList = new ArrayList<Integer>();
-		for (Node node : nodes.values()) {
-			if (node instanceof NodeGroup)
-				for (Node n : ((NodeGroup) node).getNodes())
-					nodesList.add(n.getId());
-			else
-				nodesList.add(node.getId());
-		}
-		return nodesList;
 	}
 
 	public void clear() {

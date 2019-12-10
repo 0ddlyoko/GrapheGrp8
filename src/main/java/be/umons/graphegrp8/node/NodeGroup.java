@@ -19,7 +19,13 @@ public class NodeGroup extends Node {
 		StringBuilder sb = new StringBuilder("NodeGroup[id=");
 		sb.append(getId()).append(", fakeId=");
 		sb.append(getFakeId()).append(", communityId=");
-		sb.append(getCommunity().getId()).append(", neighborsNumber=");
+		sb.append(getCommunity().getId()).append(", nodesSize=");
+		sb.append(nodes.size()).append(", nodes=[");
+		for (Node n : nodes)
+			sb.append(n.getId()).append(",");
+		// Remove the last ","
+		sb.setLength(sb.length() - 1);
+		sb.append("]").append(", neighborsSize=");
 		sb.append(getNeighbors().size()).append(", neighbors=[");
 		for (Node n : getNeighbors())
 			sb.append(n.getId()).append(",");
