@@ -19,7 +19,6 @@ public class NodeManager {
 	private Node[] nodes;
 	private Node[] fakeIdNodes;
 	private HashMap<Integer, Community> communities;
-	private HashMap<Integer, Community> tempCommunities;
 	// If true, a node has changed community
 	private boolean edited;
 	// If true, a node has changed community
@@ -31,16 +30,14 @@ public class NodeManager {
 
 	public NodeManager(FileParser fileParser) {
 		this.fileParser = fileParser;
+		modularity = new Modularity(fileParser);
 	}
 
 	/**
 	 * Load all
 	 */
 	public void load() {
-//		LOG.info("Loading NodeManager");
 		// Create the Modularity
-		modularity = new Modularity(fileParser);
-//		LOG.info("{} nodes loaded", fileParser.getNbVertices());
 		loadNodes();
 		loadEdges();
 		loadCommunities();
@@ -50,7 +47,6 @@ public class NodeManager {
 	 * Load nodes
 	 */
 	public void loadNodes() {
-//		LOG.info("Loading {} nodes", fileParser.getNbVertices());
 		// Clear (Garbage Collector)
 		this.nodes = new Node[fileParser.getNbVertices()];
 		this.fakeIdNodes = new Node[fileParser.getNbVertices()];
@@ -68,14 +64,11 @@ public class NodeManager {
 		int[] succ = fileParser.getSuccTab();
 		// Add neighbors
 		// For each node
-//		LOG.info("Loading {} edges for {} nodes", fileParser.getNbEdges(), fileParser.getNbVertices());
 		for (int i = 0; i < nodes.length; i++) {
-//			LOG.info("  - Node {} with {} neighbors", i + 1, head[i + 1] - head[i]);
 			Node n = nodes[i];
 			// For each neighbors
 			for (int j = head[i]; j < head[i + 1]; j++) {
-//				LOG.info("    - => {}", succ[j - 1]);
-				// A node
+				// A neighbor
 				n.addNeighbors(nodes[succ[j - 1] - 1]);
 			}
 		}
@@ -121,41 +114,48 @@ public class NodeManager {
 	public void changeCommunity(Node node, Community community, boolean deleteOldCommunity) {
 		Community oldCommunity = node.getCommunity();
 		community.addNode(node);
-		// Calculate communityCost
-		if (oldCommunity != null)
-			oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity));
-		community.setCommunityCost(modularity.resultOfModularity(community));
-		// Test if old community is empty and if it is, remove it from the HashMap
-		if (deleteOldCommunity && oldCommunity != null && oldCommunity.size() == 0)
-			communities.remove(oldCommunity.getId());
+		if (oldCommunity == null) {
+			// Here it's the initialization of the node
+			community.setCommunityCost(modularity.resultOfModularity(community));
+		} else {
+			// Calculate communityCost
+			if (oldCommunity.size() == 0)
+				oldCommunity.setCommunityCost(0);
+			if (oldCommunity.size() == 1)
+				oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity));
+			else
+				oldCommunity.setCommunityCost(modularity.resultOfModularity(oldCommunity, node, false));
+
+			// Now community
+			if (community.size() == 1)
+				community.setCommunityCost(modularity.resultOfModularity(community));
+			else
+				community.setCommunityCost(modularity.resultOfModularity(community, node, true));
+
+			// Test if old community is empty and if it is, remove it from the HashMap
+			if (deleteOldCommunity && oldCommunity != null && oldCommunity.size() == 0)
+				communities.remove(oldCommunity.getId());
+		}
+
 	}
 
-	// Algorithme Evolutionnaire
-
 	/**
-	 * Start the algorithm first phase
+	 * Start the algorithm
 	 */
 	public void start() {
-		boolean stop = false;
 		retry = 0;
 		do {
-//			LOG.info("count = {}", count);
 			secondEdited = false;
 			initialization();
 			// Done, call evaluation
 			evaluation();
 			do {
-//			int i = 0;
 				// Selecting a node
 				selection();
+				if (selectedNode.getFakeId() % 100 == 0) {
+//					LOG.info("Selected {}, number of communities = {}", selectedNode.getFakeId(), communities.size());
+				}
 				changeCommunityIfNeeds();
-//			breading();
-//			List<Integer> tabOfIdCommunities = mutation();
-//			evaluationChild(tabOfIdCommunities);
-//			if (edited) {
-//				LOG.info("A node has changed his community, looping again !");
-//			}
-//			LOG.info("hello comm {}", edited);
 			} while (!doWeStopNow());
 
 			// Reduce nodes in same community
@@ -206,10 +206,6 @@ public class NodeManager {
 			// Reset selectedNode
 			selectedNode = null;
 		} while (secondEdited);
-
-//		} while (false);
-		if (stop)
-			System.exit(0);
 	}
 
 	/**
@@ -267,7 +263,6 @@ public class NodeManager {
 				// Not last one so we take the next one
 				selectedNode = fakeIdNodes[selectedNode.getFakeId()];
 		}
-//		LOG.debug("Selecting {}", selectedNode);
 	}
 
 	/**
@@ -276,105 +271,32 @@ public class NodeManager {
 	public void changeCommunityIfNeeds() {
 		Community current = selectedNode.getCommunity();
 		double currentModularity = current.getCommunityCost();
+		double modularityWithoutSelected = modularity.resultOfModularity(selectedNode.getCommunity(), selectedNode,
+				false);
 		Community best = null;
 		double bestCost = -1;
 
 		// For each neighbors calculate the new modularity if we change the community of
 		// the node
 		for (Node n : selectedNode.getNeighbors()) {
-//			LOG.debug("Boucle {}", n);
 			// Same community, don't check here
 			if (n.getCommunity().equals(current))
 				continue;
 			// The current cost
 			double oldCost = n.getCommunity().getCommunityCost() + currentModularity;
-			// Change community
-			changeCommunity(selectedNode, n.getCommunity(), false);
-			// Calculate new cost
-			double newCost = n.getCommunity().getCommunityCost() + current.getCommunityCost();
+			double newCost = modularity.resultOfModularity(n.getCommunity(), selectedNode, true)
+					+ modularityWithoutSelected;
 			// New cost is greater than old cost
 			if (newCost > oldCost && (bestCost == -1 || newCost > bestCost)) {
-//				LOG.info("currentModularity = {}, current.getCommunityCost() = {}, oldCost = {}, newCost = {}, bestCost = {}, node = {}, to = {}", currentModularity, current.getCommunityCost(), oldCost, newCost, bestCost, current.getId(), n.getCommunity().getId());
 				best = n.getCommunity();
 				bestCost = newCost;
 			}
-			changeCommunity(selectedNode, current, false);
 		}
-		// Put back to old community
-		// TODO Put back only after the loop
 		if (best != null) {
-//			LOG.debug("Found a better community for node {}. {} => {}", selectedNode.getId(), current.getId(), best.getId());
 			changeCommunity(selectedNode, best);
-//			LOG.info("Modularity = {}", getModularity().resultOfModularity(getCommunities()));
 			edited = true;
 			secondEdited = true;
 		}
-	}
-
-	/**
-	 * Croisements du noeud courant avec ses noeuds adjacents<br />
-	 * Fusion
-	 */
-	public void breading() {
-		tempCommunities = new HashMap<Integer, Community>(communities);
-		for (Node n : selectedNode.getNeighbors()) {
-			n.getCommunity().addNode(selectedNode);
-		}
-	}
-
-	/**
-	 * Mutations: on va construire une HashMap de communauté (noeud courant associé
-	 * à chaque voisin se trouvant deja dans une communauté et c'est avec cette
-	 * hashmap qu'on évaluara les performances
-	 */
-	public List<Integer> mutation() {
-		List<Integer> tabOfIdCommunities = new ArrayList<Integer>();
-		for (Node n : selectedNode.getNeighbors()) {
-			tabOfIdCommunities.add(n.getCommunity().getId());
-		}
-		return tabOfIdCommunities;
-	}
-
-	/**
-	 * Evaluation des performances des enfants<br />
-	 * Calcul de la modularité locale pour chaques
-	 */
-	public void evaluationChild(List<Integer> indexCommunity) {
-		for (Integer i : indexCommunity)
-			communities.get(i).setCommunityCost(modularity.resultOfModularity(communities.get(i)));
-	}
-
-	/**
-	 * Sélection pour le remplacement<br />
-	 * Sélection de la meilleur modularité parmis ses voisins et remplacement si
-	 * besoin
-	 */
-	public void selectionReplacement(List<Integer> indexCommunity) {
-
-		// s'il y'a un remplacement à effectuer alors
-		// on recuperer la communauté de destination ensuite
-		// on after tempCommunities à communities
-		// en fin on appel changecommunity(avec selected node et la communauté dest)
-		// sinon on appele pas changeCommunitie()
-
-		double maxCost = selectedNode.getCommunity().getCommunityCost();
-		Community dest = null;
-		for (Integer i : indexCommunity) {
-			double currentCost = communities.get(i).getCommunityCost();
-			if (currentCost > 0 && currentCost > maxCost) {
-				maxCost = currentCost;
-				dest = communities.get(i);
-			}
-		}
-		communities = tempCommunities;
-		if (dest != null) {
-			changeCommunity(this.selectedNode, dest);
-			evaluation();
-			selectedNode.setFakeId(selectedNode.getFakeId() + 1);
-			edited = true;
-			secondEdited = true;
-		}
-
 	}
 
 	/**
